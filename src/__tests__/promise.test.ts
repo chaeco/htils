@@ -46,11 +46,11 @@ describe('promise - Promise 异步工具', () => {
 
   it('parallel - 并行执行', async () => {
     const results = await promise.parallel([
-      async () => Promise.resolve(1),
-      async () => Promise.resolve(2),
-      async () => Promise.resolve(3),
+      Promise.resolve(1),
+      Promise.resolve(2),
+      Promise.resolve(3),
     ])
-    expect(results).toHaveLength(3)
+    expect(results).toEqual([1, 2, 3])
   })
 
   it('cancellable - 可取消 Promise', async () => {
