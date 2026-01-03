@@ -1,6 +1,6 @@
 # htils - 真实项目工具库
 
-> 一个轻量级的 TypeScript 工具库，包含在实际开发中真正会用到的工具函数。
+> 一个轻量级的 TypeScript 工具库。v0.0.2
 
 ## ✨ 核心特性
 
@@ -15,17 +15,29 @@
 ## 📦 安装
 
 ```bash
-npm install git+ssh://git@github.com:chaeco/htils.git
-# 或
+# 从 GitHub 安装（推荐）
 npm install github:chaeco/htils
+
+# 或使用 SSH
+npm install git+ssh://git@github.com:chaeco/htils.git
 ```
 
 ## 🚀 快速开始
 
+### 模块导入
+
+```typescript
+// 单个模块导入
+import { string, array, object } from '@chaeco/htils'
+
+// 或使用完整导入
+import htils from '@chaeco/htils'
+```
+
 ### 命名转换
 
 ```typescript
-import { scformat } from 'htils'
+import { scformat } from '@chaeco/htils'
 
 // 蛇形转驼峰
 scformat.snakeToCamel('user_name') // 'userName'
@@ -41,7 +53,9 @@ scformat.camelDataToSnake({ userName: 'tom', userAge: 20 })
 ### 字符串处理
 
 ```typescript
-import { capitalize, kebabCase, truncate, isBlank } from 'htils'
+import { string } from '@chaeco/htils'
+
+const { capitalize, kebabCase, truncate, isBlank } = string
 
 capitalize('hello') // 'Hello'
 kebabCase('helloWorld') // 'hello-world'
@@ -52,7 +66,9 @@ isBlank('  ') // true
 ### 数组处理
 
 ```typescript
-import { unique, flatten, chunk, groupBy } from 'htils'
+import { array } from '@chaeco/htils'
+
+const { unique, flatten, chunk, groupBy } = array
 
 unique([1, 2, 2, 3]) // [1, 2, 3]
 flatten([[1, 2], [3, [4, 5]]]) // [1, 2, 3, 4, 5]
@@ -64,7 +80,9 @@ groupBy([{type: 'a', val: 1}, {type: 'b', val: 2}], 'type')
 ### 对象处理
 
 ```typescript
-import { deepClone, merge, pick, omit } from 'htils'
+import { object } from '@chaeco/htils'
+
+const { deepClone, merge, pick, omit } = object
 
 deepClone({ a: { b: 1 } }) // { a: { b: 1 } }
 merge({ a: 1 }, { b: 2 }) // { a: 1, b: 2 }
@@ -75,7 +93,7 @@ omit({ a: 1, b: 2, c: 3 }, ['c']) // { a: 1, b: 2 }
 ### 加密/哈希
 
 ```typescript
-import { crypto } from 'htils'
+import { crypto } from '@chaeco/htils'
 
 // MD5
 crypto.md5('hello') // '5d41402abc4b2a76b9719d911017c592'
@@ -95,7 +113,7 @@ const decrypted = crypto.aesDecrypt(encrypted, 'password') // 'secret'
 ### 文件处理
 
 ```typescript
-import { fileHandler } from 'htils'
+import { fileHandler } from '@chaeco/htils'
 
 // 文件信息
 const info = fileHandler.getFileInfo(file)
@@ -128,7 +146,7 @@ fileHandler.downloadText('notes.txt', 'Hello World')
 ### 表单验证
 
 ```typescript
-import { FormValidator, formRules } from 'htils'
+import { FormValidator, formRules } from '@chaeco/htils'
 
 const validator = new FormValidator()
 
@@ -147,7 +165,7 @@ const result = validator.validateAll()
 ### DOM 操作
 
 ```typescript
-import { dom } from 'htils'
+import { dom } from '@chaeco/htils'
 
 const el = dom.querySelector('.button')
 dom.addClass(el, 'active')
@@ -158,7 +176,7 @@ dom.on(el, 'click', () => console.log('clicked'))
 ### 性能监控
 
 ```typescript
-import { PerformanceMonitor } from 'htils'
+import { PerformanceMonitor } from '@chaeco/htils'
 
 const monitor = new PerformanceMonitor()
 const metrics = monitor.getMetrics()
@@ -378,7 +396,9 @@ console.log('LCP:', metrics.lcp) // Largest Contentful Paint
 ### 防抖和节流
 
 ```typescript
-import { debounce, throttle } from 'htils'
+import { debounceThrottle } from '@chaeco/htils'
+
+const { debounce, throttle } = debounceThrottle
 
 // 防抖 - 延迟执行
 const debouncedSearch = debounce((query) => {
@@ -400,7 +420,9 @@ window.addEventListener('scroll', throttledScroll)
 ### Promise 并发控制
 
 ```typescript
-import { concurrency } from 'htils'
+import { promise } from '@chaeco/htils'
+
+const { concurrency } = promise
 
 const urls = ['url1', 'url2', 'url3', 'url4', 'url5']
 const results = await concurrency(
@@ -412,7 +434,7 @@ const results = await concurrency(
 ### 带重试的网络请求
 
 ```typescript
-import { request } from 'htils'
+import { request } from '@chaeco/htils'
 
 const response = await request.fetchWithRetry(
   'https://api.example.com/data',
@@ -430,7 +452,7 @@ const response = await request.fetchWithRetry(
 ### LRU 缓存
 
 ```typescript
-import { Cache } from 'htils'
+import { Cache } from '@chaeco/htils'
 
 const cache = new Cache({
   ttl: 5 * 60 * 1000, // 5分钟过期
@@ -447,7 +469,7 @@ const data = cache.get('user:1')
 ### 事件总线
 
 ```typescript
-import { eventBus } from 'htils'
+import { eventBus } from '@chaeco/htils'
 
 // 订阅
 eventBus.on('user:login', (data) => {
@@ -466,7 +488,7 @@ eventBus.once('app:init', () => {
 ### 树形数据转换
 
 ```typescript
-import { tree } from 'htils'
+import { tree } from '@chaeco/htils'
 
 // 列表转树
 const flatList = [
@@ -493,7 +515,7 @@ const depth = tree.getTreeDepth(treeData)
 ### 设备检测
 
 ```typescript
-import { device } from 'htils'
+import { device } from '@chaeco/htils'
 
 if (device.isMobile()) {
   console.log('在移动设备上')
@@ -511,7 +533,7 @@ console.log('屏幕信息:', device.getScreenInfo())
 ### ID 生成
 
 ```typescript
-import { id } from 'htils'
+import { id } from '@chaeco/htils'
 
 // UUID
 const uuid = id.uuid()

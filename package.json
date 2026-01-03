@@ -1,6 +1,6 @@
 {
   "name": "@chaeco/htils",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "一个轻量级的 TypeScript 工具库，提供常用的字符串、数组、对象、文件等工具函数",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
