@@ -7,6 +7,7 @@
  * @example querySelector('.class')
  */
 function querySelector<T extends Element = Element>(selector: string, parent?: Element | Document): T | null {
+  if (typeof document === 'undefined' && !parent) return null
   return (parent || document).querySelector<T>(selector)
 }
 
@@ -15,6 +16,7 @@ function querySelector<T extends Element = Element>(selector: string, parent?: E
  * @example querySelectorAll('.item')
  */
 function querySelectorAll<T extends Element = Element>(selector: string, parent?: Element | Document): T[] {
+  if (typeof document === 'undefined' && !parent) return []
   return Array.from((parent || document).querySelectorAll<T>(selector))
 }
 
@@ -79,6 +81,7 @@ function removeAttr(element: Element, name: string): void {
 function css(element: HTMLElement, prop: string | Record<string, string>, value?: string): string | void {
   if (typeof prop === 'string') {
     if (value === undefined) {
+      if (typeof window === 'undefined') return ''
       return window.getComputedStyle(element).getPropertyValue(prop)
     }
     element.style.setProperty(prop, value)
@@ -122,10 +125,11 @@ function toggle(element: HTMLElement, display: string = 'block'): void {
  * @example getOffset(el)
  */
 function getOffset(element: Element): { top: number; left: number } {
+  if (typeof window === 'undefined') return { top: 0, left: 0 }
   const rect = element.getBoundingClientRect()
   return {
-    top: rect.top + window.pageYOffset,
-    left: rect.left + window.pageXOffset,
+    top: rect.top + (window.pageYOffset || 0),
+    left: rect.left + (window.pageXOffset || 0),
   }
 }
 
@@ -146,7 +150,9 @@ function getSize(element: Element): { width: number; height: number } {
  * @example scrollToElement(el, { behavior: 'smooth' })
  */
 function scrollToElement(element: Element, options?: ScrollIntoViewOptions): void {
-  element.scrollIntoView(options || { behavior: 'smooth', block: 'start' })
+  if (typeof element.scrollIntoView === 'function') {
+    element.scrollIntoView(options || { behavior: 'smooth', block: 'start' })
+  }
 }
 
 /**
@@ -154,10 +160,12 @@ function scrollToElement(element: Element, options?: ScrollIntoViewOptions): voi
  * @example scrollToTop()
  */
 function scrollToTop(smooth: boolean = true): void {
-  window.scrollTo({
-    top: 0,
-    behavior: smooth ? 'smooth' : 'auto',
-  })
+  if (typeof window !== 'undefined' && typeof window.scrollTo === 'function') {
+    window.scrollTo({
+      top: 0,
+      behavior: smooth ? 'smooth' : 'auto',
+    })
+  }
 }
 
 /**
@@ -165,9 +173,10 @@ function scrollToTop(smooth: boolean = true): void {
  * @example getScrollPosition()
  */
 function getScrollPosition(): { x: number; y: number } {
+  if (typeof window === 'undefined') return { x: 0, y: 0 }
   return {
-    x: window.pageXOffset || document.documentElement.scrollLeft,
-    y: window.pageYOffset || document.documentElement.scrollTop,
+    x: window.pageXOffset || (typeof document !== 'undefined' ? document.documentElement.scrollLeft : 0),
+    y: window.pageYOffset || (typeof document !== 'undefined' ? document.documentElement.scrollTop : 0),
   }
 }
 
@@ -176,12 +185,13 @@ function getScrollPosition(): { x: number; y: number } {
  * @example isInViewport(el)
  */
 function isInViewport(element: Element): boolean {
+  if (typeof window === 'undefined') return false
   const rect = element.getBoundingClientRect()
   return (
     rect.top >= 0 &&
     rect.left >= 0 &&
-    rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
-    rect.right <= (window.innerWidth || document.documentElement.clientWidth)
+    rect.bottom <= (window.innerHeight || (typeof document !== 'undefined' ? document.documentElement.clientHeight : 0)) &&
+    rect.right <= (window.innerWidth || (typeof document !== 'undefined' ? document.documentElement.clientWidth : 0))
   )
 }
 
@@ -192,7 +202,8 @@ function isInViewport(element: Element): boolean {
 function createElement<K extends keyof HTMLElementTagNameMap>(
   tagName: K,
   props?: Partial<HTMLElementTagNameMap[K]>
-): HTMLElementTagNameMap[K] {
+): HTMLElementTagNameMap[K] | null {
+  if (typeof document === 'undefined') return null as any
   const element = document.createElement(tagName)
   if (props) {
     Object.assign(element, props)

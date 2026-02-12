@@ -11,15 +11,17 @@ class PerformanceMonitor {
     constructor() {
         this.metrics = {};
         this.observers = [];
-        this.initObservers();
-        this.measureLoadTimes();
+        if (typeof window !== 'undefined') {
+            this.initObservers();
+            this.measureLoadTimes();
+        }
     }
     /**
      * 初始化性能观察器
      */
     initObservers() {
         // 监听 FCP 和 LCP
-        if ('PerformanceObserver' in window) {
+        if (typeof window !== 'undefined' && 'PerformanceObserver' in window) {
             try {
                 const paintObserver = new PerformanceObserver((list) => {
                     for (const entry of list.getEntries()) {
@@ -93,6 +95,8 @@ class PerformanceMonitor {
      * @example monitor.getPageLoadTime()
      */
     getPageLoadTime() {
+        if (typeof performance === 'undefined' || typeof performance.getEntriesByType !== 'function')
+            return null;
         const perfData = performance.getEntriesByType('navigation')[0];
         if (!perfData)
             return null;
@@ -103,6 +107,8 @@ class PerformanceMonitor {
      * @example monitor.getResourceTiming()
      */
     getResourceTiming() {
+        if (typeof performance === 'undefined' || typeof performance.getEntriesByType !== 'function')
+            return [];
         return performance.getEntriesByType('resource');
     }
     /**
@@ -110,27 +116,34 @@ class PerformanceMonitor {
      * @example monitor.mark('user-action-start')
      */
     mark(name) {
-        performance.mark(name);
+        if (typeof performance !== 'undefined' && typeof performance.mark === 'function') {
+            performance.mark(name);
+        }
     }
     /**
      * 测量两个标记之间的时间
      * @example monitor.measure('user-action', 'start', 'end')
      */
     measure(name, startMark, endMark) {
-        performance.measure(name, startMark, endMark);
-        const measures = performance.getEntriesByName(name, 'measure');
-        return measures[measures.length - 1]?.duration || 0;
+        if (typeof performance !== 'undefined' && typeof performance.measure === 'function') {
+            performance.measure(name, startMark, endMark);
+            const measures = performance.getEntriesByName(name, 'measure');
+            return measures[measures.length - 1]?.duration || 0;
+        }
+        return 0;
     }
     /**
      * 清除标记
      * @example monitor.clearMarks('my-mark')
      */
     clearMarks(name) {
-        if (name) {
-            performance.clearMarks(name);
-        }
-        else {
-            performance.clearMarks();
+        if (typeof performance !== 'undefined' && typeof performance.clearMarks === 'function') {
+            if (name) {
+                performance.clearMarks(name);
+            }
+            else {
+                performance.clearMarks();
+            }
         }
     }
     /**
@@ -138,11 +151,13 @@ class PerformanceMonitor {
      * @example monitor.clearMeasures('my-measure')
      */
     clearMeasures(name) {
-        if (name) {
-            performance.clearMeasures(name);
-        }
-        else {
-            performance.clearMeasures();
+        if (typeof performance !== 'undefined' && typeof performance.clearMeasures === 'function') {
+            if (name) {
+                performance.clearMeasures(name);
+            }
+            else {
+                performance.clearMeasures();
+            }
         }
     }
     /**
@@ -150,6 +165,8 @@ class PerformanceMonitor {
      * @example monitor.getMemoryInfo()
      */
     getMemoryInfo() {
+        if (typeof performance === 'undefined')
+            return null;
         const memory = performance.memory;
         if (!memory)
             return null;
@@ -175,7 +192,7 @@ exports.PerformanceMonitor = PerformanceMonitor;
 class FPSMonitor {
     constructor() {
         this.fps = 0;
-        this.lastTime = performance.now();
+        this.lastTime = typeof performance !== 'undefined' ? performance.now() : Date.now();
         this.frames = 0;
         this.rafId = null;
     }
@@ -184,6 +201,10 @@ class FPSMonitor {
      * @example fpsMonitor.start((fps) => console.log('FPS:', fps))
      */
     start(callback) {
+        if (typeof requestAnimationFrame === 'undefined') {
+            console.warn('requestAnimationFrame is not supported in this environment');
+            return;
+        }
         this.callback = callback;
         this.rafId = requestAnimationFrame(this.measureFPS.bind(this));
     }
@@ -198,7 +219,9 @@ class FPSMonitor {
             this.frames = 0;
             this.lastTime = time;
         }
-        this.rafId = requestAnimationFrame(this.measureFPS.bind(this));
+        if (typeof requestAnimationFrame !== 'undefined') {
+            this.rafId = requestAnimationFrame(this.measureFPS.bind(this));
+        }
     }
     /**
      * 获取当前 FPS
@@ -211,7 +234,7 @@ class FPSMonitor {
      * 停止监控
      */
     stop() {
-        if (this.rafId !== null) {
+        if (this.rafId !== null && typeof cancelAnimationFrame !== 'undefined') {
             cancelAnimationFrame(this.rafId);
             this.rafId = null;
         }
@@ -223,9 +246,9 @@ exports.FPSMonitor = FPSMonitor;
  * @example measureTime(() => { // do something })
  */
 function measureTime(fn, label) {
-    const start = performance.now();
+    const start = typeof performance !== 'undefined' ? performance.now() : Date.now();
     const result = fn();
-    const end = performance.now();
+    const end = typeof performance !== 'undefined' ? performance.now() : Date.now();
     const duration = end - start;
     if (label) {
         console.log(`[${label}] 执行时间: ${duration.toFixed(2)}ms`);
@@ -237,9 +260,9 @@ function measureTime(fn, label) {
  * @example await measureAsyncTime(async () => { // do something })
  */
 async function measureAsyncTime(fn, label) {
-    const start = performance.now();
+    const start = typeof performance !== 'undefined' ? performance.now() : Date.now();
     const result = await fn();
-    const end = performance.now();
+    const end = typeof performance !== 'undefined' ? performance.now() : Date.now();
     const duration = end - start;
     if (label) {
         console.log(`[${label}] 执行时间: ${duration.toFixed(2)}ms`);
@@ -250,7 +273,7 @@ async function measureAsyncTime(fn, label) {
  * 长任务监控
  */
 function monitorLongTasks(callback) {
-    if (!('PerformanceLongTaskTiming' in window)) {
+    if (typeof window === 'undefined' || !('PerformanceLongTaskTiming' in window)) {
         console.warn('Long Tasks API not supported');
         return () => { };
     }
@@ -275,6 +298,8 @@ function monitorLongTasks(callback) {
  * @example getNetworkInfo()
  */
 function getNetworkInfo() {
+    if (typeof navigator === 'undefined')
+        return null;
     const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
     if (!connection)
         return null;

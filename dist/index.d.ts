@@ -467,7 +467,7 @@ declare const htils: {
             y: number;
         };
         isInViewport: (element: Element) => boolean;
-        createElement: <K extends keyof HTMLElementTagNameMap>(tagName: K, props?: Partial<HTMLElementTagNameMap[K]>) => HTMLElementTagNameMap[K];
+        createElement: <K extends keyof HTMLElementTagNameMap>(tagName: K, props?: Partial<HTMLElementTagNameMap[K]>) => HTMLElementTagNameMap[K] | null;
         on: <K extends keyof HTMLElementEventMap>(element: Element | Window | Document, event: K, handler: (e: HTMLElementEventMap[K]) => void, options?: AddEventListenerOptions) => void;
         off: <K extends keyof HTMLElementEventMap>(element: Element | Window | Document, event: K, handler: (e: HTMLElementEventMap[K]) => void, options?: EventListenerOptions) => void;
         once: <K extends keyof HTMLElementEventMap>(element: Element | Window | Document, event: K, handler: (e: HTMLElementEventMap[K]) => void) => void;

@@ -14,13 +14,49 @@ interface StorageData<T> {
   version?: number
 }
 
+/**
+ * 内存存储抽象，用于非浏览器环境
+ */
+class MemoryStorage implements globalThis.Storage {
+  private data: Record<string, string> = {}
+
+  get length(): number {
+    return Object.keys(this.data).length
+  }
+
+  clear(): void {
+    this.data = {}
+  }
+
+  getItem(key: string): string | null {
+    return this.data[key] || null
+  }
+
+  key(index: number): string | null {
+    return Object.keys(this.data)[index] || null
+  }
+
+  removeItem(key: string): void {
+    delete this.data[key]
+  }
+
+  setItem(key: string, value: string): void {
+    this.data[key] = value
+  }
+}
+
 class Storage {
   private prefix: string
   private storage: globalThis.Storage
 
   constructor(isSession: boolean = false, prefix: string = 'app_') {
-    this.storage = isSession ? sessionStorage : localStorage
     this.prefix = prefix
+    if (typeof window !== 'undefined') {
+      this.storage = isSession ? sessionStorage : localStorage
+    } else {
+      // Node.js 环境使用内存存储
+      this.storage = new MemoryStorage()
+    }
   }
 
   private getKey(key: string): string {
@@ -179,7 +215,12 @@ class Storage {
   getSize(key: string): number {
     try {
       const item = this.storage.getItem(this.getKey(key))
-      return item ? new Blob([item]).size : 0
+      if (!item) return 0
+      if (typeof Blob !== 'undefined') {
+        return new Blob([item]).size
+      }
+      // Node.js fallback
+      return typeof Buffer !== 'undefined' ? Buffer.byteLength(item) : item.length
     } catch (error) {
       return 0
     }
@@ -196,7 +237,13 @@ class Storage {
         const key = this.storage.key(i)
         if (key) {
           const item = this.storage.getItem(key)
-          total += item ? new Blob([item]).size : 0
+          if (item) {
+            if (typeof Blob !== 'undefined') {
+              total += new Blob([item]).size
+            } else {
+              total += typeof Buffer !== 'undefined' ? Buffer.byteLength(item) : item.length
+            }
+          }
         }
       }
     } catch (error) {

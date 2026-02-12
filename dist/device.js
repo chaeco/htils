@@ -62,7 +62,12 @@ function isIPhone() {
  */
 function isIPad() {
     const ua = getUserAgent();
-    return /iPad/i.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    if (/iPad/i.test(ua))
+        return true;
+    if (typeof navigator !== 'undefined' && navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1) {
+        return true;
+    }
+    return false;
 }
 /**
  * 检测是否为微信浏览器
@@ -78,7 +83,7 @@ function isWeChat() {
  */
 function isMiniProgram() {
     const ua = getUserAgent();
-    return /miniProgram/i.test(ua) || typeof window.wx !== 'undefined';
+    return /miniProgram/i.test(ua) || (typeof window !== 'undefined' && typeof window.wx !== 'undefined');
 }
 /**
  * 检测是否为支付宝
@@ -226,7 +231,7 @@ function getScreenInfo() {
         availWidth: screen.availWidth,
         availHeight: screen.availHeight,
         colorDepth: screen.colorDepth,
-        pixelRatio: window.devicePixelRatio || 1,
+        pixelRatio: typeof window !== 'undefined' ? window.devicePixelRatio || 1 : 1,
         orientation: screen.width > screen.height ? 'landscape' : 'portrait',
     };
 }
@@ -238,8 +243,8 @@ function isTouchDevice() {
     if (typeof window === 'undefined')
         return false;
     return ('ontouchstart' in window ||
-        navigator.maxTouchPoints > 0 ||
-        navigator.msMaxTouchPoints > 0);
+        (typeof navigator !== 'undefined' && navigator.maxTouchPoints > 0) ||
+        (typeof navigator !== 'undefined' && navigator.msMaxTouchPoints > 0));
 }
 /**
  * 检测是否为 Retina 屏幕
@@ -248,13 +253,15 @@ function isTouchDevice() {
 function isRetina() {
     if (typeof window === 'undefined')
         return false;
-    return window.devicePixelRatio >= 2;
+    return (window.devicePixelRatio || 1) >= 2;
 }
 /**
  * 检测网络连接类型
  * @example getNetworkType() // '4g', 'wifi', 'none'
  */
 function getNetworkType() {
+    if (typeof navigator === 'undefined')
+        return 'unknown';
     const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
     if (!connection)
         return 'unknown';
@@ -267,7 +274,7 @@ function getNetworkType() {
 function isOnline() {
     if (typeof navigator === 'undefined')
         return true;
-    return navigator.onLine;
+    return navigator.onLine !== false;
 }
 /**
  * 获取语言
@@ -334,6 +341,8 @@ function supportsServiceWorker() {
  * @example supportsLocalStorage() // true/false
  */
 function supportsLocalStorage() {
+    if (typeof window === 'undefined' || typeof localStorage === 'undefined')
+        return false;
     try {
         const test = '__test__';
         localStorage.setItem(test, test);

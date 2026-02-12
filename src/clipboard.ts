@@ -8,7 +8,7 @@
  */
 async function copy(text: string): Promise<boolean> {
   // 优先使用 Clipboard API
-  if (navigator.clipboard && window.isSecureContext) {
+  if (typeof navigator !== 'undefined' && navigator.clipboard && typeof window !== 'undefined' && window.isSecureContext) {
     try {
       await navigator.clipboard.writeText(text)
       return true
@@ -16,7 +16,7 @@ async function copy(text: string): Promise<boolean> {
       console.error('Clipboard API failed:', error)
     }
   }
-  
+
   // 降级方案：使用 execCommand
   return copyFallback(text)
 }
@@ -25,6 +25,7 @@ async function copy(text: string): Promise<boolean> {
  * 复制文本的降级方案（兼容老浏览器）
  */
 function copyFallback(text: string): boolean {
+  if (typeof document === 'undefined') return false
   try {
     const textarea = document.createElement('textarea')
     textarea.value = text
@@ -32,11 +33,11 @@ function copyFallback(text: string): boolean {
     textarea.style.top = '0'
     textarea.style.left = '-9999px'
     textarea.setAttribute('readonly', '')
-    
+
     document.body.appendChild(textarea)
-    
+
     // iOS 兼容
-    if (navigator.userAgent.match(/ipad|iphone/i)) {
+    if (typeof navigator !== 'undefined' && navigator.userAgent.match(/ipad|iphone/i)) {
       const range = document.createRange()
       range.selectNodeContents(textarea)
       const selection = window.getSelection()
@@ -48,10 +49,10 @@ function copyFallback(text: string): boolean {
     } else {
       textarea.select()
     }
-    
+
     const success = document.execCommand('copy')
     document.body.removeChild(textarea)
-    
+
     return success
   } catch (error) {
     console.error('Copy fallback failed:', error)
@@ -64,7 +65,7 @@ function copyFallback(text: string): boolean {
  * @example const text = await paste()
  */
 async function paste(): Promise<string> {
-  if (navigator.clipboard && window.isSecureContext) {
+  if (typeof navigator !== 'undefined' && navigator.clipboard && typeof window !== 'undefined' && window.isSecureContext) {
     try {
       return await navigator.clipboard.readText()
     } catch (error) {
@@ -72,8 +73,8 @@ async function paste(): Promise<string> {
       throw new Error('无法读取剪贴板内容，可能需要用户授权')
     }
   }
-  
-  throw new Error('当前浏览器不支持读取剪贴板')
+
+  throw new Error('当前环境不支持读取剪贴板')
 }
 
 /**
@@ -81,10 +82,10 @@ async function paste(): Promise<string> {
  * @example await copyHTML('<p>Hello <strong>World</strong></p>')
  */
 async function copyHTML(html: string): Promise<boolean> {
-  if (navigator.clipboard && window.isSecureContext) {
+  if (typeof navigator !== 'undefined' && navigator.clipboard && typeof window !== 'undefined' && window.isSecureContext) {
     try {
       const blob = new Blob([html], { type: 'text/html' })
-      const data = [new ClipboardItem({ 'text/html': blob })]
+      const data = [new (window as any).ClipboardItem({ 'text/html': blob })]
       await navigator.clipboard.write(data)
       return true
     } catch (error) {
@@ -92,7 +93,7 @@ async function copyHTML(html: string): Promise<boolean> {
       return false
     }
   }
-  
+
   // 降级：只复制纯文本
   const text = html.replace(/<[^>]*>/g, '')
   return copyFallback(text)
@@ -103,9 +104,9 @@ async function copyHTML(html: string): Promise<boolean> {
  * @example await copyImage(blob)
  */
 async function copyImage(blob: Blob): Promise<boolean> {
-  if (navigator.clipboard && window.isSecureContext) {
+  if (typeof navigator !== 'undefined' && navigator.clipboard && typeof window !== 'undefined' && window.isSecureContext) {
     try {
-      const data = [new ClipboardItem({ [blob.type]: blob })]
+      const data = [new (window as any).ClipboardItem({ [blob.type]: blob })]
       await navigator.clipboard.write(data)
       return true
     } catch (error) {
@@ -113,8 +114,8 @@ async function copyImage(blob: Blob): Promise<boolean> {
       return false
     }
   }
-  
-  throw new Error('当前浏览器不支持复制图片')
+
+  throw new Error('当前环境不支持复制图片')
 }
 
 /**
@@ -137,10 +138,10 @@ async function copyImageFromURL(url: string): Promise<boolean> {
  * @example const blob = await pasteImage()
  */
 async function pasteImage(): Promise<Blob | null> {
-  if (navigator.clipboard && window.isSecureContext) {
+  if (typeof navigator !== 'undefined' && navigator.clipboard && typeof window !== 'undefined' && window.isSecureContext) {
     try {
       const items = await navigator.clipboard.read()
-      
+
       for (const item of items) {
         for (const type of item.types) {
           if (type.startsWith('image/')) {
@@ -148,15 +149,15 @@ async function pasteImage(): Promise<Blob | null> {
           }
         }
       }
-      
+
       return null
     } catch (error) {
       console.error('Paste image failed:', error)
       return null
     }
   }
-  
-  throw new Error('当前浏览器不支持读取剪贴板图片')
+
+  throw new Error('当前环境不支持读取剪贴板图片')
 }
 
 /**
@@ -164,17 +165,19 @@ async function pasteImage(): Promise<Blob | null> {
  * @example onPaste((text) => console.log('粘贴:', text))
  */
 function onPaste(callback: (text: string) => void): () => void {
+  if (typeof document === 'undefined') return () => { }
+
   const handler = async (e: ClipboardEvent) => {
     e.preventDefault()
-    
+
     const text = e.clipboardData?.getData('text/plain')
     if (text) {
       callback(text)
     }
   }
-  
+
   document.addEventListener('paste', handler)
-  
+
   // 返回取消监听的函数
   return () => {
     document.removeEventListener('paste', handler)
@@ -186,17 +189,19 @@ function onPaste(callback: (text: string) => void): () => void {
  * @example onCopy((text) => console.log('复制:', text))
  */
 function onCopy(callback: (text: string) => void): () => void {
+  if (typeof document === 'undefined') return () => { }
+
   const handler = (e: ClipboardEvent) => {
-    const selection = window.getSelection()
+    const selection = typeof window !== 'undefined' ? window.getSelection() : null
     const text = selection?.toString() || ''
-    
+
     if (text) {
       callback(text)
     }
   }
-  
+
   document.addEventListener('copy', handler)
-  
+
   return () => {
     document.removeEventListener('copy', handler)
   }
@@ -207,20 +212,22 @@ function onCopy(callback: (text: string) => void): () => void {
  * @example interceptCopy((text) => text + '\n来源: example.com')
  */
 function interceptCopy(modifier: (text: string) => string): () => void {
+  if (typeof document === 'undefined') return () => { }
+
   const handler = (e: ClipboardEvent) => {
     e.preventDefault()
-    
-    const selection = window.getSelection()
+
+    const selection = typeof window !== 'undefined' ? window.getSelection() : null
     const text = selection?.toString() || ''
-    
+
     if (text && e.clipboardData) {
       const modifiedText = modifier(text)
       e.clipboardData.setData('text/plain', modifiedText)
     }
   }
-  
+
   document.addEventListener('copy', handler)
-  
+
   return () => {
     document.removeEventListener('copy', handler)
   }
@@ -246,7 +253,12 @@ async function copyElementAsImage(element: HTMLElement): Promise<boolean> {
  * @example supportsClipboard() // true/false
  */
 function supportsClipboard(): boolean {
-  return !!(navigator.clipboard && window.isSecureContext)
+  return !!(
+    typeof navigator !== 'undefined' &&
+    navigator.clipboard &&
+    typeof window !== 'undefined' &&
+    window.isSecureContext
+  )
 }
 
 /**
@@ -254,8 +266,8 @@ function supportsClipboard(): boolean {
  * @example await requestPermission()
  */
 async function requestPermission(): Promise<boolean> {
-  if (!navigator.permissions) return false
-  
+  if (typeof navigator === 'undefined' || !navigator.permissions) return false
+
   try {
     const result = await navigator.permissions.query({ name: 'clipboard-read' as PermissionName })
     return result.state === 'granted'
@@ -274,32 +286,37 @@ async function copyMultiple(data: {
   html?: string
   rtf?: string
 }): Promise<boolean> {
-  if (!navigator.clipboard || !window.isSecureContext) {
+  if (
+    typeof navigator === 'undefined' ||
+    !navigator.clipboard ||
+    typeof window === 'undefined' ||
+    !window.isSecureContext
+  ) {
     // 降级：只复制文本
     if (data.text) {
       return copyFallback(data.text)
     }
     return false
   }
-  
+
   try {
     const items: Record<string, Blob> = {}
-    
+
     if (data.text) {
       items['text/plain'] = new Blob([data.text], { type: 'text/plain' })
     }
-    
+
     if (data.html) {
       items['text/html'] = new Blob([data.html], { type: 'text/html' })
     }
-    
+
     if (data.rtf) {
       items['text/rtf'] = new Blob([data.rtf], { type: 'text/rtf' })
     }
-    
-    const clipboardItem = new ClipboardItem(items)
+
+    const clipboardItem = new (window as any).ClipboardItem(items)
     await navigator.clipboard.write([clipboardItem])
-    
+
     return true
   } catch (error) {
     console.error('Copy multiple formats failed:', error)

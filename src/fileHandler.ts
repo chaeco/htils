@@ -62,6 +62,9 @@ function formatFileSize(bytes: number): string {
  */
 function readFileAsText(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
+    if (typeof FileReader === 'undefined') {
+      return reject(new Error('FileReader not supported'))
+    }
     const reader = new FileReader()
     reader.onload = (e) => resolve(e.target?.result as string)
     reader.onerror = reject
@@ -75,6 +78,9 @@ function readFileAsText(file: File): Promise<string> {
  */
 function readFileAsDataURL(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
+    if (typeof FileReader === 'undefined') {
+      return reject(new Error('FileReader not supported'))
+    }
     const reader = new FileReader()
     reader.onload = (e) => resolve(e.target?.result as string)
     reader.onerror = reject
@@ -88,6 +94,9 @@ function readFileAsDataURL(file: File): Promise<string> {
  */
 function readFileAsArrayBuffer(file: File): Promise<ArrayBuffer> {
   return new Promise((resolve, reject) => {
+    if (typeof FileReader === 'undefined') {
+      return reject(new Error('FileReader not supported'))
+    }
     const reader = new FileReader()
     reader.onload = (e) => resolve(e.target?.result as ArrayBuffer)
     reader.onerror = reject
@@ -100,6 +109,9 @@ function readFileAsArrayBuffer(file: File): Promise<ArrayBuffer> {
  * @example downloadFile('data.json', jsonString, 'application/json')
  */
 function downloadFile(filename: string, content: string | Blob, type?: string): void {
+  if (typeof document === 'undefined' || typeof URL === 'undefined' || typeof URL.createObjectURL !== 'function') {
+    return
+  }
   const blob = content instanceof Blob ? content : new Blob([content], { type: type || 'text/plain' })
   const url = URL.createObjectURL(blob)
   const link = document.createElement('a')
@@ -148,14 +160,24 @@ function compressImage(
   maxHeight?: number
 ): Promise<Blob> {
   return new Promise((resolve, reject) => {
+    if (typeof FileReader === 'undefined' || typeof document === 'undefined') {
+      return reject(new Error('当前环境不支持图片压缩'))
+    }
     const reader = new FileReader()
     reader.readAsDataURL(file)
     reader.onload = (e) => {
+      if (typeof Image === 'undefined') {
+        return reject(new Error('当前环境不支持图片处理'))
+      }
       const img = new Image()
       img.src = e.target?.result as string
       img.onload = () => {
         const canvas = document.createElement('canvas')
-        const ctx = canvas.getContext('2d')!
+        const ctx = canvas.getContext('2d')
+
+        if (!ctx) {
+          return reject(new Error('Canvas context not supported'))
+        }
 
         let { width, height } = img
 
@@ -197,9 +219,15 @@ function compressImage(
  */
 function getImageDimensions(file: File): Promise<{ width: number; height: number }> {
   return new Promise((resolve, reject) => {
+    if (typeof FileReader === 'undefined') {
+      return reject(new Error('FileReader not supported'))
+    }
     const reader = new FileReader()
     reader.readAsDataURL(file)
     reader.onload = (e) => {
+      if (typeof Image === 'undefined') {
+        return reject(new Error('Image not supported'))
+      }
       const img = new Image()
       img.src = e.target?.result as string
       img.onload = () => resolve({ width: img.width, height: img.height })
@@ -217,12 +245,15 @@ function selectFile(options: {
   accept?: string
   multiple?: boolean
 }): Promise<FileList | null> {
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
+    if (typeof document === 'undefined') {
+      return resolve(null)
+    }
     const input = document.createElement('input')
     input.type = 'file'
     if (options.accept) input.accept = options.accept
     if (options.multiple) input.multiple = options.multiple
-    
+
     input.onchange = () => resolve(input.files)
     input.click()
   })
@@ -233,14 +264,20 @@ function selectFile(options: {
  * @example base64ToBlob(base64String, 'image/png')
  */
 function base64ToBlob(base64: string, type: string = 'application/octet-stream'): Blob {
-  const byteString = atob(base64.split(',')[1] || base64)
+  const base64Data = base64.split(',')[1] || base64
+  let byteString: string
+  if (typeof atob !== 'undefined') {
+    byteString = atob(base64Data)
+  } else {
+    byteString = Buffer.from(base64Data, 'base64').toString('binary')
+  }
   const ab = new ArrayBuffer(byteString.length)
   const ia = new Uint8Array(ab)
-  
+
   for (let i = 0; i < byteString.length; i++) {
     ia[i] = byteString.charCodeAt(i)
   }
-  
+
   return new Blob([ab], { type })
 }
 
@@ -306,7 +343,7 @@ async function calculateFileHash(
   algorithm: 'md5' | 'sha256' | 'sha512' = 'sha256'
 ): Promise<string> {
   const buffer = await readFileAsArrayBuffer(file)
-  
+
   switch (algorithm) {
     case 'md5':
       return crypto.md5FromArrayBuffer(buffer)
@@ -370,10 +407,10 @@ async function validateETag(file: File, etag: string): Promise<boolean> {
  */
 async function compareFiles(file1: File, file2: File): Promise<boolean> {
   if (file1.size !== file2.size) return false
-  
+
   const hash1 = await calculateFileMD5(file1)
   const hash2 = await calculateFileMD5(file2)
-  
+
   return hash1 === hash2
 }
 
@@ -403,11 +440,11 @@ async function calculateOSSETag(
     onProgress?.(100, 1, 1)
     return crypto.md5FromArrayBuffer(buffer)
   }
-  
+
   // 分片上传情况：OSS 算法
   const chunks = sliceFile(file, chunkSize)
   const totalChunks = chunks.length
-  
+
   // 计算每个分片的 MD5
   const partMD5s: string[] = []
   for (let i = 0; i < chunks.length; i++) {
@@ -419,25 +456,25 @@ async function calculateOSSETag(
       reader.readAsArrayBuffer(chunk)
     })
     partMD5s.push(crypto.md5FromArrayBuffer(buffer))
-    
+
     // 报告进度
     const progress = ((i + 1) / totalChunks) * 100
     onProgress?.(progress, i + 1, totalChunks)
   }
-  
+
   // 将所有 MD5（十六进制）转为二进制并拼接
   const concatenated = new Uint8Array(partMD5s.length * 16)
   let offset = 0
-  
+
   for (const md5 of partMD5s) {
     for (let i = 0; i < 16; i++) {
       concatenated[offset++] = parseInt(md5.substring(i * 2, i * 2 + 2), 16)
     }
   }
-  
+
   // 对拼接后的数据计算 MD5
   const finalMD5 = crypto.md5FromArrayBuffer(concatenated.buffer)
-  
+
   return `${finalMD5}-${chunks.length}`
 }
 
@@ -458,7 +495,7 @@ function isOSSMultipartETag(etag: string): boolean {
 function parseOSSMultipartETag(etag: string): { md5: string; partCount: number } | null {
   const match = etag.match(/^([a-f0-9]{32})-(\d+)$/i)
   if (!match) return null
-  
+
   return {
     md5: match[1],
     partCount: parseInt(match[2], 10),
@@ -478,7 +515,7 @@ function getOSSChunkInfo(file: File, chunkSize: number = 5 * 1024 * 1024): {
 } {
   const chunkCount = Math.ceil(file.size / chunkSize)
   const lastChunkSize = file.size % chunkSize || chunkSize
-  
+
   return {
     chunkSize,
     chunkCount,

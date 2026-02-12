@@ -38,13 +38,17 @@ function setCookie(name, value, options = {}) {
     if (options.sameSite) {
         cookieString += `; samesite=${options.sameSite}`;
     }
-    document.cookie = cookieString;
+    if (typeof document !== 'undefined') {
+        document.cookie = cookieString;
+    }
 }
 /**
  * 获取 Cookie
  * @example getCookie('token')
  */
 function getCookie(name) {
+    if (typeof document === 'undefined')
+        return null;
     const nameEQ = encodeURIComponent(name) + '=';
     const cookies = document.cookie.split(';');
     for (let cookie of cookies) {
@@ -78,6 +82,8 @@ function hasCookie(name) {
  */
 function getAllCookies() {
     const cookies = {};
+    if (typeof document === 'undefined')
+        return cookies;
     const cookieStrings = document.cookie.split(';');
     for (let cookie of cookieStrings) {
         cookie = cookie.trim();
@@ -115,7 +121,7 @@ class TokenManager {
         if (this.storage === 'cookie') {
             setCookie(this.tokenKey, token, options || { expires: 1, path: '/' });
         }
-        else {
+        else if (typeof localStorage !== 'undefined') {
             localStorage.setItem(this.tokenKey, token);
         }
     }
@@ -127,9 +133,10 @@ class TokenManager {
         if (this.storage === 'cookie') {
             return getCookie(this.tokenKey);
         }
-        else {
+        else if (typeof localStorage !== 'undefined') {
             return localStorage.getItem(this.tokenKey);
         }
+        return null;
     }
     /**
      * 设置刷新令牌
@@ -139,7 +146,7 @@ class TokenManager {
         if (this.storage === 'cookie') {
             setCookie(this.refreshTokenKey, token, options || { expires: 7, path: '/' });
         }
-        else {
+        else if (typeof localStorage !== 'undefined') {
             localStorage.setItem(this.refreshTokenKey, token);
         }
     }
@@ -151,9 +158,10 @@ class TokenManager {
         if (this.storage === 'cookie') {
             return getCookie(this.refreshTokenKey);
         }
-        else {
+        else if (typeof localStorage !== 'undefined') {
             return localStorage.getItem(this.refreshTokenKey);
         }
+        return null;
     }
     /**
      * 清除所有令牌
@@ -164,7 +172,7 @@ class TokenManager {
             removeCookie(this.tokenKey, { path: '/' });
             removeCookie(this.refreshTokenKey, { path: '/' });
         }
-        else {
+        else if (typeof localStorage !== 'undefined') {
             localStorage.removeItem(this.tokenKey);
             localStorage.removeItem(this.refreshTokenKey);
         }

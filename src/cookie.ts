@@ -49,7 +49,9 @@ function setCookie(name: string, value: string, options: CookieOptions = {}): vo
     cookieString += `; samesite=${options.sameSite}`
   }
 
-  document.cookie = cookieString
+  if (typeof document !== 'undefined') {
+    document.cookie = cookieString
+  }
 }
 
 /**
@@ -57,6 +59,7 @@ function setCookie(name: string, value: string, options: CookieOptions = {}): vo
  * @example getCookie('token')
  */
 function getCookie(name: string): string | null {
+  if (typeof document === 'undefined') return null
   const nameEQ = encodeURIComponent(name) + '='
   const cookies = document.cookie.split(';')
 
@@ -95,6 +98,7 @@ function hasCookie(name: string): boolean {
  */
 function getAllCookies(): Record<string, string> {
   const cookies: Record<string, string> = {}
+  if (typeof document === 'undefined') return cookies
   const cookieStrings = document.cookie.split(';')
 
   for (let cookie of cookieStrings) {
@@ -146,7 +150,7 @@ class TokenManager {
   setAccessToken(token: string, options?: CookieOptions): void {
     if (this.storage === 'cookie') {
       setCookie(this.tokenKey, token, options || { expires: 1, path: '/' })
-    } else {
+    } else if (typeof localStorage !== 'undefined') {
       localStorage.setItem(this.tokenKey, token)
     }
   }
@@ -158,9 +162,10 @@ class TokenManager {
   getAccessToken(): string | null {
     if (this.storage === 'cookie') {
       return getCookie(this.tokenKey)
-    } else {
+    } else if (typeof localStorage !== 'undefined') {
       return localStorage.getItem(this.tokenKey)
     }
+    return null
   }
 
   /**
@@ -170,7 +175,7 @@ class TokenManager {
   setRefreshToken(token: string, options?: CookieOptions): void {
     if (this.storage === 'cookie') {
       setCookie(this.refreshTokenKey, token, options || { expires: 7, path: '/' })
-    } else {
+    } else if (typeof localStorage !== 'undefined') {
       localStorage.setItem(this.refreshTokenKey, token)
     }
   }
@@ -182,9 +187,10 @@ class TokenManager {
   getRefreshToken(): string | null {
     if (this.storage === 'cookie') {
       return getCookie(this.refreshTokenKey)
-    } else {
+    } else if (typeof localStorage !== 'undefined') {
       return localStorage.getItem(this.refreshTokenKey)
     }
+    return null
   }
 
   /**
@@ -195,7 +201,7 @@ class TokenManager {
     if (this.storage === 'cookie') {
       removeCookie(this.tokenKey, { path: '/' })
       removeCookie(this.refreshTokenKey, { path: '/' })
-    } else {
+    } else if (typeof localStorage !== 'undefined') {
       localStorage.removeItem(this.tokenKey)
       localStorage.removeItem(this.refreshTokenKey)
     }

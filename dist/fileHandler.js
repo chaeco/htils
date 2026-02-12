@@ -52,6 +52,9 @@ function formatFileSize(bytes) {
  */
 function readFileAsText(file) {
     return new Promise((resolve, reject) => {
+        if (typeof FileReader === 'undefined') {
+            return reject(new Error('FileReader not supported'));
+        }
         const reader = new FileReader();
         reader.onload = (e) => resolve(e.target?.result);
         reader.onerror = reject;
@@ -64,6 +67,9 @@ function readFileAsText(file) {
  */
 function readFileAsDataURL(file) {
     return new Promise((resolve, reject) => {
+        if (typeof FileReader === 'undefined') {
+            return reject(new Error('FileReader not supported'));
+        }
         const reader = new FileReader();
         reader.onload = (e) => resolve(e.target?.result);
         reader.onerror = reject;
@@ -76,6 +82,9 @@ function readFileAsDataURL(file) {
  */
 function readFileAsArrayBuffer(file) {
     return new Promise((resolve, reject) => {
+        if (typeof FileReader === 'undefined') {
+            return reject(new Error('FileReader not supported'));
+        }
         const reader = new FileReader();
         reader.onload = (e) => resolve(e.target?.result);
         reader.onerror = reject;
@@ -87,6 +96,9 @@ function readFileAsArrayBuffer(file) {
  * @example downloadFile('data.json', jsonString, 'application/json')
  */
 function downloadFile(filename, content, type) {
+    if (typeof document === 'undefined' || typeof URL === 'undefined' || typeof URL.createObjectURL !== 'function') {
+        return;
+    }
     const blob = content instanceof Blob ? content : new Blob([content], { type: type || 'text/plain' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
@@ -126,14 +138,23 @@ function downloadCSV(filename, data) {
  */
 function compressImage(file, quality = 0.8, maxWidth, maxHeight) {
     return new Promise((resolve, reject) => {
+        if (typeof FileReader === 'undefined' || typeof document === 'undefined') {
+            return reject(new Error('当前环境不支持图片压缩'));
+        }
         const reader = new FileReader();
         reader.readAsDataURL(file);
         reader.onload = (e) => {
+            if (typeof Image === 'undefined') {
+                return reject(new Error('当前环境不支持图片处理'));
+            }
             const img = new Image();
             img.src = e.target?.result;
             img.onload = () => {
                 const canvas = document.createElement('canvas');
                 const ctx = canvas.getContext('2d');
+                if (!ctx) {
+                    return reject(new Error('Canvas context not supported'));
+                }
                 let { width, height } = img;
                 // 计算新尺寸
                 if (maxWidth && width > maxWidth) {
@@ -167,9 +188,15 @@ function compressImage(file, quality = 0.8, maxWidth, maxHeight) {
  */
 function getImageDimensions(file) {
     return new Promise((resolve, reject) => {
+        if (typeof FileReader === 'undefined') {
+            return reject(new Error('FileReader not supported'));
+        }
         const reader = new FileReader();
         reader.readAsDataURL(file);
         reader.onload = (e) => {
+            if (typeof Image === 'undefined') {
+                return reject(new Error('Image not supported'));
+            }
             const img = new Image();
             img.src = e.target?.result;
             img.onload = () => resolve({ width: img.width, height: img.height });
@@ -183,7 +210,10 @@ function getImageDimensions(file) {
  * @example await selectFile({ accept: 'image/*', multiple: false })
  */
 function selectFile(options) {
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
+        if (typeof document === 'undefined') {
+            return resolve(null);
+        }
         const input = document.createElement('input');
         input.type = 'file';
         if (options.accept)
@@ -199,7 +229,14 @@ function selectFile(options) {
  * @example base64ToBlob(base64String, 'image/png')
  */
 function base64ToBlob(base64, type = 'application/octet-stream') {
-    const byteString = atob(base64.split(',')[1] || base64);
+    const base64Data = base64.split(',')[1] || base64;
+    let byteString;
+    if (typeof atob !== 'undefined') {
+        byteString = atob(base64Data);
+    }
+    else {
+        byteString = Buffer.from(base64Data, 'base64').toString('binary');
+    }
     const ab = new ArrayBuffer(byteString.length);
     const ia = new Uint8Array(ab);
     for (let i = 0; i < byteString.length; i++) {

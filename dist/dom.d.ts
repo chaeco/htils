@@ -107,7 +107,7 @@ declare function isInViewport(element: Element): boolean;
  * 创建元素
  * @example createElement('div', { className: 'box', textContent: 'Hello' })
  */
-declare function createElement<K extends keyof HTMLElementTagNameMap>(tagName: K, props?: Partial<HTMLElementTagNameMap[K]>): HTMLElementTagNameMap[K];
+declare function createElement<K extends keyof HTMLElementTagNameMap>(tagName: K, props?: Partial<HTMLElementTagNameMap[K]>): HTMLElementTagNameMap[K] | null;
 /**
  * 添加事件监听
  * @example on(el, 'click', handler)

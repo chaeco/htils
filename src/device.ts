@@ -90,7 +90,11 @@ function isIPhone(): boolean {
  */
 function isIPad(): boolean {
   const ua = getUserAgent()
-  return /iPad/i.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
+  if (/iPad/i.test(ua)) return true
+  if (typeof navigator !== 'undefined' && navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1) {
+    return true
+  }
+  return false
 }
 
 /**
@@ -108,7 +112,7 @@ function isWeChat(): boolean {
  */
 function isMiniProgram(): boolean {
   const ua = getUserAgent()
-  return /miniProgram/i.test(ua) || typeof (window as any).wx !== 'undefined'
+  return /miniProgram/i.test(ua) || (typeof window !== 'undefined' && typeof (window as any).wx !== 'undefined')
 }
 
 /**
@@ -126,14 +130,14 @@ function isAlipay(): boolean {
  */
 function getBrowserName(): string {
   const ua = getUserAgent()
-  
+
   if (/Edg/i.test(ua)) return 'Edge'
   if (/Chrome/i.test(ua) && !/Edg/i.test(ua)) return 'Chrome'
   if (/Safari/i.test(ua) && !/Chrome/i.test(ua)) return 'Safari'
   if (/Firefox/i.test(ua)) return 'Firefox'
   if (/MSIE|Trident/i.test(ua)) return 'IE'
   if (/Opera|OPR/i.test(ua)) return 'Opera'
-  
+
   return 'Unknown'
 }
 
@@ -144,9 +148,9 @@ function getBrowserName(): string {
 function getBrowserVersion(): string {
   const ua = getUserAgent()
   const browser = getBrowserName()
-  
+
   let match: RegExpMatchArray | null = null
-  
+
   switch (browser) {
     case 'Chrome':
       match = ua.match(/Chrome\/(\d+\.\d+\.\d+\.\d+)/)
@@ -167,7 +171,7 @@ function getBrowserVersion(): string {
       match = ua.match(/(?:Opera|OPR)\/(\d+\.\d+\.\d+)/)
       break
   }
-  
+
   return match ? match[1] : 'Unknown'
 }
 
@@ -177,13 +181,13 @@ function getBrowserVersion(): string {
  */
 function getOSName(): string {
   const ua = getUserAgent()
-  
+
   if (/Windows/i.test(ua)) return 'Windows'
   if (/Mac OS X/i.test(ua)) return 'macOS'
   if (/iPhone|iPad|iPod/i.test(ua)) return 'iOS'
   if (/Android/i.test(ua)) return 'Android'
   if (/Linux/i.test(ua)) return 'Linux'
-  
+
   return 'Unknown'
 }
 
@@ -194,9 +198,9 @@ function getOSName(): string {
 function getOSVersion(): string {
   const ua = getUserAgent()
   const os = getOSName()
-  
+
   let match: RegExpMatchArray | null = null
-  
+
   switch (os) {
     case 'Windows':
       if (/Windows NT 10.0/i.test(ua)) return '10'
@@ -217,7 +221,7 @@ function getOSVersion(): string {
       if (match) return match[1]
       break
   }
-  
+
   return 'Unknown'
 }
 
@@ -262,7 +266,7 @@ function getScreenInfo(): {
     availWidth: screen.availWidth,
     availHeight: screen.availHeight,
     colorDepth: screen.colorDepth,
-    pixelRatio: window.devicePixelRatio || 1,
+    pixelRatio: typeof window !== 'undefined' ? window.devicePixelRatio || 1 : 1,
     orientation: screen.width > screen.height ? 'landscape' : 'portrait',
   }
 }
@@ -273,11 +277,11 @@ function getScreenInfo(): {
  */
 function isTouchDevice(): boolean {
   if (typeof window === 'undefined') return false
-  
+
   return (
     'ontouchstart' in window ||
-    navigator.maxTouchPoints > 0 ||
-    (navigator as any).msMaxTouchPoints > 0
+    (typeof navigator !== 'undefined' && navigator.maxTouchPoints > 0) ||
+    (typeof navigator !== 'undefined' && (navigator as any).msMaxTouchPoints > 0)
   )
 }
 
@@ -287,7 +291,7 @@ function isTouchDevice(): boolean {
  */
 function isRetina(): boolean {
   if (typeof window === 'undefined') return false
-  return window.devicePixelRatio >= 2
+  return (window.devicePixelRatio || 1) >= 2
 }
 
 /**
@@ -295,10 +299,12 @@ function isRetina(): boolean {
  * @example getNetworkType() // '4g', 'wifi', 'none'
  */
 function getNetworkType(): string {
+  if (typeof navigator === 'undefined') return 'unknown'
+
   const connection = (navigator as any).connection || (navigator as any).mozConnection || (navigator as any).webkitConnection
-  
+
   if (!connection) return 'unknown'
-  
+
   return connection.effectiveType || connection.type || 'unknown'
 }
 
@@ -308,7 +314,7 @@ function getNetworkType(): string {
  */
 function isOnline(): boolean {
   if (typeof navigator === 'undefined') return true
-  return navigator.onLine
+  return navigator.onLine !== false
 }
 
 /**
@@ -357,7 +363,7 @@ function isDarkMode(): boolean {
  */
 async function supportsWebP(): Promise<boolean> {
   if (typeof document === 'undefined') return false
-  
+
   return new Promise((resolve) => {
     const img = new Image()
     img.onload = () => resolve(img.width > 0 && img.height > 0)
@@ -379,6 +385,7 @@ function supportsServiceWorker(): boolean {
  * @example supportsLocalStorage() // true/false
  */
 function supportsLocalStorage(): boolean {
+  if (typeof window === 'undefined' || typeof localStorage === 'undefined') return false
   try {
     const test = '__test__'
     localStorage.setItem(test, test)
@@ -395,7 +402,7 @@ function supportsLocalStorage(): boolean {
  */
 function supportsWebGL(): boolean {
   if (typeof document === 'undefined') return false
-  
+
   try {
     const canvas = document.createElement('canvas')
     return !!(canvas.getContext('webgl') || canvas.getContext('experimental-webgl'))
@@ -415,34 +422,34 @@ const device = {
   isIPad,
   isTouchDevice,
   isRetina,
-  
+
   // 应用检测
   isWeChat,
   isMiniProgram,
   isAlipay,
-  
+
   // 浏览器信息
   getBrowserName,
   getBrowserVersion,
-  
+
   // 操作系统信息
   getOSName,
   getOSVersion,
-  
+
   // 设备信息
   getDeviceType,
   getDeviceInfo,
   getScreenInfo,
-  
+
   // 网络信息
   getNetworkType,
   isOnline,
-  
+
   // 其他
   getLanguage,
   getUserAgent,
   isDarkMode,
-  
+
   // 功能检测
   supportsWebP,
   supportsServiceWorker,

@@ -4,10 +4,42 @@
  */
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getSessionStorage = exports.getLocalStorage = exports.Storage = void 0;
+/**
+ * 内存存储抽象，用于非浏览器环境
+ */
+class MemoryStorage {
+    constructor() {
+        this.data = {};
+    }
+    get length() {
+        return Object.keys(this.data).length;
+    }
+    clear() {
+        this.data = {};
+    }
+    getItem(key) {
+        return this.data[key] || null;
+    }
+    key(index) {
+        return Object.keys(this.data)[index] || null;
+    }
+    removeItem(key) {
+        delete this.data[key];
+    }
+    setItem(key, value) {
+        this.data[key] = value;
+    }
+}
 class Storage {
     constructor(isSession = false, prefix = 'app_') {
-        this.storage = isSession ? sessionStorage : localStorage;
         this.prefix = prefix;
+        if (typeof window !== 'undefined') {
+            this.storage = isSession ? sessionStorage : localStorage;
+        }
+        else {
+            // Node.js 环境使用内存存储
+            this.storage = new MemoryStorage();
+        }
     }
     getKey(key) {
         return `${this.prefix}${key}`;
@@ -155,7 +187,13 @@ class Storage {
     getSize(key) {
         try {
             const item = this.storage.getItem(this.getKey(key));
-            return item ? new Blob([item]).size : 0;
+            if (!item)
+                return 0;
+            if (typeof Blob !== 'undefined') {
+                return new Blob([item]).size;
+            }
+            // Node.js fallback
+            return typeof Buffer !== 'undefined' ? Buffer.byteLength(item) : item.length;
         }
         catch (error) {
             return 0;
@@ -172,7 +210,14 @@ class Storage {
                 const key = this.storage.key(i);
                 if (key) {
                     const item = this.storage.getItem(key);
-                    total += item ? new Blob([item]).size : 0;
+                    if (item) {
+                        if (typeof Blob !== 'undefined') {
+                            total += new Blob([item]).size;
+                        }
+                        else {
+                            total += typeof Buffer !== 'undefined' ? Buffer.byteLength(item) : item.length;
+                        }
+                    }
                 }
             }
         }

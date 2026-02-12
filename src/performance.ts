@@ -27,8 +27,10 @@ class PerformanceMonitor {
   private observers: PerformanceObserver[] = []
 
   constructor() {
-    this.initObservers()
-    this.measureLoadTimes()
+    if (typeof window !== 'undefined') {
+      this.initObservers()
+      this.measureLoadTimes()
+    }
   }
 
   /**
@@ -36,7 +38,7 @@ class PerformanceMonitor {
    */
   private initObservers(): void {
     // 监听 FCP 和 LCP
-    if ('PerformanceObserver' in window) {
+    if (typeof window !== 'undefined' && 'PerformanceObserver' in window) {
       try {
         const paintObserver = new PerformanceObserver((list) => {
           for (const entry of list.getEntries()) {
@@ -116,6 +118,7 @@ class PerformanceMonitor {
    * @example monitor.getPageLoadTime()
    */
   getPageLoadTime(): number | null {
+    if (typeof performance === 'undefined' || typeof performance.getEntriesByType !== 'function') return null
     const perfData = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming
     if (!perfData) return null
 
@@ -127,6 +130,7 @@ class PerformanceMonitor {
    * @example monitor.getResourceTiming()
    */
   getResourceTiming(): PerformanceResourceTiming[] {
+    if (typeof performance === 'undefined' || typeof performance.getEntriesByType !== 'function') return []
     return performance.getEntriesByType('resource') as PerformanceResourceTiming[]
   }
 
@@ -135,7 +139,9 @@ class PerformanceMonitor {
    * @example monitor.mark('user-action-start')
    */
   mark(name: string): void {
-    performance.mark(name)
+    if (typeof performance !== 'undefined' && typeof performance.mark === 'function') {
+      performance.mark(name)
+    }
   }
 
   /**
@@ -143,9 +149,12 @@ class PerformanceMonitor {
    * @example monitor.measure('user-action', 'start', 'end')
    */
   measure(name: string, startMark: string, endMark: string): number {
-    performance.measure(name, startMark, endMark)
-    const measures = performance.getEntriesByName(name, 'measure')
-    return measures[measures.length - 1]?.duration || 0
+    if (typeof performance !== 'undefined' && typeof performance.measure === 'function') {
+      performance.measure(name, startMark, endMark)
+      const measures = performance.getEntriesByName(name, 'measure')
+      return measures[measures.length - 1]?.duration || 0
+    }
+    return 0
   }
 
   /**
@@ -153,10 +162,12 @@ class PerformanceMonitor {
    * @example monitor.clearMarks('my-mark')
    */
   clearMarks(name?: string): void {
-    if (name) {
-      performance.clearMarks(name)
-    } else {
-      performance.clearMarks()
+    if (typeof performance !== 'undefined' && typeof performance.clearMarks === 'function') {
+      if (name) {
+        performance.clearMarks(name)
+      } else {
+        performance.clearMarks()
+      }
     }
   }
 
@@ -165,10 +176,12 @@ class PerformanceMonitor {
    * @example monitor.clearMeasures('my-measure')
    */
   clearMeasures(name?: string): void {
-    if (name) {
-      performance.clearMeasures(name)
-    } else {
-      performance.clearMeasures()
+    if (typeof performance !== 'undefined' && typeof performance.clearMeasures === 'function') {
+      if (name) {
+        performance.clearMeasures(name)
+      } else {
+        performance.clearMeasures()
+      }
     }
   }
 
@@ -177,6 +190,7 @@ class PerformanceMonitor {
    * @example monitor.getMemoryInfo()
    */
   getMemoryInfo(): MemoryInfo | null {
+    if (typeof performance === 'undefined') return null
     const memory = (performance as any).memory
     if (!memory) return null
 
@@ -202,7 +216,7 @@ class PerformanceMonitor {
  */
 class FPSMonitor {
   private fps: number = 0
-  private lastTime: number = performance.now()
+  private lastTime: number = typeof performance !== 'undefined' ? performance.now() : Date.now()
   private frames: number = 0
   private rafId: number | null = null
   private callback?: (fps: number) => void
@@ -212,6 +226,10 @@ class FPSMonitor {
    * @example fpsMonitor.start((fps) => console.log('FPS:', fps))
    */
   start(callback?: (fps: number) => void): void {
+    if (typeof requestAnimationFrame === 'undefined') {
+      console.warn('requestAnimationFrame is not supported in this environment')
+      return
+    }
     this.callback = callback
     this.rafId = requestAnimationFrame(this.measureFPS.bind(this))
   }
@@ -221,7 +239,7 @@ class FPSMonitor {
    */
   private measureFPS(time: number): void {
     this.frames++
-    
+
     if (time >= this.lastTime + 1000) {
       this.fps = Math.round((this.frames * 1000) / (time - this.lastTime))
       this.callback?.(this.fps)
@@ -229,7 +247,9 @@ class FPSMonitor {
       this.lastTime = time
     }
 
-    this.rafId = requestAnimationFrame(this.measureFPS.bind(this))
+    if (typeof requestAnimationFrame !== 'undefined') {
+      this.rafId = requestAnimationFrame(this.measureFPS.bind(this))
+    }
   }
 
   /**
@@ -244,7 +264,7 @@ class FPSMonitor {
    * 停止监控
    */
   stop(): void {
-    if (this.rafId !== null) {
+    if (this.rafId !== null && typeof cancelAnimationFrame !== 'undefined') {
       cancelAnimationFrame(this.rafId)
       this.rafId = null
     }
@@ -256,9 +276,9 @@ class FPSMonitor {
  * @example measureTime(() => { // do something })
  */
 function measureTime<T>(fn: () => T, label?: string): T {
-  const start = performance.now()
+  const start = typeof performance !== 'undefined' ? performance.now() : Date.now()
   const result = fn()
-  const end = performance.now()
+  const end = typeof performance !== 'undefined' ? performance.now() : Date.now()
   const duration = end - start
 
   if (label) {
@@ -273,9 +293,9 @@ function measureTime<T>(fn: () => T, label?: string): T {
  * @example await measureAsyncTime(async () => { // do something })
  */
 async function measureAsyncTime<T>(fn: () => Promise<T>, label?: string): Promise<T> {
-  const start = performance.now()
+  const start = typeof performance !== 'undefined' ? performance.now() : Date.now()
   const result = await fn()
-  const end = performance.now()
+  const end = typeof performance !== 'undefined' ? performance.now() : Date.now()
   const duration = end - start
 
   if (label) {
@@ -289,9 +309,9 @@ async function measureAsyncTime<T>(fn: () => Promise<T>, label?: string): Promis
  * 长任务监控
  */
 function monitorLongTasks(callback: (duration: number, entries: PerformanceEntry[]) => void): () => void {
-  if (!('PerformanceLongTaskTiming' in window)) {
+  if (typeof window === 'undefined' || !('PerformanceLongTaskTiming' in window)) {
     console.warn('Long Tasks API not supported')
-    return () => {}
+    return () => { }
   }
 
   const observer = new PerformanceObserver((list) => {
@@ -317,8 +337,9 @@ function monitorLongTasks(callback: (duration: number, entries: PerformanceEntry
  * @example getNetworkInfo()
  */
 function getNetworkInfo(): any {
+  if (typeof navigator === 'undefined') return null
   const connection = (navigator as any).connection || (navigator as any).mozConnection || (navigator as any).webkitConnection
-  
+
   if (!connection) return null
 
   return {

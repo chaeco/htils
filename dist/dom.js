@@ -8,6 +8,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
  * @example querySelector('.class')
  */
 function querySelector(selector, parent) {
+    if (typeof document === 'undefined' && !parent)
+        return null;
     return (parent || document).querySelector(selector);
 }
 /**
@@ -15,6 +17,8 @@ function querySelector(selector, parent) {
  * @example querySelectorAll('.item')
  */
 function querySelectorAll(selector, parent) {
+    if (typeof document === 'undefined' && !parent)
+        return [];
     return Array.from((parent || document).querySelectorAll(selector));
 }
 /**
@@ -72,6 +76,8 @@ function removeAttr(element, name) {
 function css(element, prop, value) {
     if (typeof prop === 'string') {
         if (value === undefined) {
+            if (typeof window === 'undefined')
+                return '';
             return window.getComputedStyle(element).getPropertyValue(prop);
         }
         element.style.setProperty(prop, value);
@@ -113,10 +119,12 @@ function toggle(element, display = 'block') {
  * @example getOffset(el)
  */
 function getOffset(element) {
+    if (typeof window === 'undefined')
+        return { top: 0, left: 0 };
     const rect = element.getBoundingClientRect();
     return {
-        top: rect.top + window.pageYOffset,
-        left: rect.left + window.pageXOffset,
+        top: rect.top + (window.pageYOffset || 0),
+        left: rect.left + (window.pageXOffset || 0),
     };
 }
 /**
@@ -135,26 +143,32 @@ function getSize(element) {
  * @example scrollToElement(el, { behavior: 'smooth' })
  */
 function scrollToElement(element, options) {
-    element.scrollIntoView(options || { behavior: 'smooth', block: 'start' });
+    if (typeof element.scrollIntoView === 'function') {
+        element.scrollIntoView(options || { behavior: 'smooth', block: 'start' });
+    }
 }
 /**
  * 滚动到顶部
  * @example scrollToTop()
  */
 function scrollToTop(smooth = true) {
-    window.scrollTo({
-        top: 0,
-        behavior: smooth ? 'smooth' : 'auto',
-    });
+    if (typeof window !== 'undefined' && typeof window.scrollTo === 'function') {
+        window.scrollTo({
+            top: 0,
+            behavior: smooth ? 'smooth' : 'auto',
+        });
+    }
 }
 /**
  * 获取滚动位置
  * @example getScrollPosition()
  */
 function getScrollPosition() {
+    if (typeof window === 'undefined')
+        return { x: 0, y: 0 };
     return {
-        x: window.pageXOffset || document.documentElement.scrollLeft,
-        y: window.pageYOffset || document.documentElement.scrollTop,
+        x: window.pageXOffset || (typeof document !== 'undefined' ? document.documentElement.scrollLeft : 0),
+        y: window.pageYOffset || (typeof document !== 'undefined' ? document.documentElement.scrollTop : 0),
     };
 }
 /**
@@ -162,17 +176,21 @@ function getScrollPosition() {
  * @example isInViewport(el)
  */
 function isInViewport(element) {
+    if (typeof window === 'undefined')
+        return false;
     const rect = element.getBoundingClientRect();
     return (rect.top >= 0 &&
         rect.left >= 0 &&
-        rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
-        rect.right <= (window.innerWidth || document.documentElement.clientWidth));
+        rect.bottom <= (window.innerHeight || (typeof document !== 'undefined' ? document.documentElement.clientHeight : 0)) &&
+        rect.right <= (window.innerWidth || (typeof document !== 'undefined' ? document.documentElement.clientWidth : 0)));
 }
 /**
  * 创建元素
  * @example createElement('div', { className: 'box', textContent: 'Hello' })
  */
 function createElement(tagName, props) {
+    if (typeof document === 'undefined')
+        return null;
     const element = document.createElement(tagName);
     if (props) {
         Object.assign(element, props);
