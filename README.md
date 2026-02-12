@@ -1,6 +1,12 @@
 # htils - 真实项目工具库
 
-> 一个轻量级的 TypeScript 工具库。v0.0.3
+[![NPM Version](https://img.shields.io/badge/version-0.0.3-blue.svg)](https://github.com/chaeco/htils)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue.svg?style=flat&logo=typescript)](https://www.typescriptlang.org/)
+[![Environment](https://img.shields.io/badge/Environment-Isomorphic-brightgreen.svg)](https://github.com/chaeco/htils)
+[![Vitest](https://img.shields.io/badge/Tested%20with-Vitest-6E9F18?logo=vitest&logoColor=white)](https://vitest.dev/)
+
+> 一个轻量级的 TypeScript 工具库。
 
 ## ✨ 核心特性
 
