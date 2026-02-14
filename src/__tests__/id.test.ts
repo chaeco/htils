@@ -67,6 +67,26 @@ describe('ID Generators', () => {
     })
   })
 
+  describe('snowflake', () => {
+    it('should generate valid snowflake id', () => {
+      const sid = id.snowflake()
+      expect(typeof sid).toBe('string')
+      expect(BigInt(sid)).toBeGreaterThan(0n)
+    })
+
+    it('should generate unique ids', () => {
+      const sid1 = id.snowflake()
+      const sid2 = id.snowflake()
+      expect(sid1).not.toBe(sid2)
+    })
+
+    it('should use custom worker id', () => {
+      const gen = id.createSnowflake(1)
+      const sid = gen.nextId()
+      expect(typeof sid).toBe('string')
+    })
+  })
+
   describe('hashId', () => {
     it('should generate consistent hash for same input', () => {
       const hash1 = id.hashId('test@example.com')

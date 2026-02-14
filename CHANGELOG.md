@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.0.4] - 2026-02-14
+
+### Added
+- Added robust `Snowflake` ID generator implementation (64-bit BigInt).
+- Added `Snowflake` class and `createSnowflake` factory function for custom worker ID configurations.
+- Improved `snowflake()` utility with standard algorithm support.
+
 ## [0.0.3] - 2026-02-12
 
 ### Added

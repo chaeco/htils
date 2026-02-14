@@ -30,7 +30,7 @@ import fileHandler from './fileHandler'
 import device from './device'
 import clipboard from './clipboard'
 import tree from './tree'
-import id, { IncrementalId } from './id'
+import id, { IncrementalId, Snowflake } from './id'
 
 /**
  * 工具函数集合
@@ -117,6 +117,7 @@ export {
   tree,
   id,
   IncrementalId,
+  Snowflake,
 }
 
 export default htils

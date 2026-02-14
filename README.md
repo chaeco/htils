@@ -1,6 +1,6 @@
 # htils - 真实项目工具库
 
-[![NPM Version](https://img.shields.io/badge/version-0.0.3-blue.svg)](https://github.com/chaeco/htils)
+[![NPM Version](https://img.shields.io/badge/version-0.0.4-blue.svg)](https://github.com/chaeco/htils)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue.svg?style=flat&logo=typescript)](https://www.typescriptlang.org/)
 [![Environment](https://img.shields.io/badge/Environment-Isomorphic-brightgreen.svg)](https://github.com/chaeco/htils)
@@ -328,7 +328,7 @@ console.log('LCP:', metrics.lcp) // Largest Contentful Paint
   - listToTree, treeToList, findNode, findPath, filterTree,
     mapTree, getTreeDepth, getLeafNodes
 
-- ✅ **id** - ID 生成器（18 个函数）
+- ✅ **id** - ID 生成器（21 个函数）
   - uuid, nanoid, snowflake, objectId, ulid, randomString,
     hashId, IncrementalId, isUuid, isObjectId
 
@@ -539,7 +539,7 @@ console.log('屏幕信息:', device.getScreenInfo())
 ### ID 生成
 
 ```typescript
-import { id } from '@chaeco/htils'
+import { id, Snowflake, createSnowflake } from '@chaeco/htils'
 
 // UUID
 const uuid = id.uuid()
@@ -547,13 +547,21 @@ const uuid = id.uuid()
 // 纳秒 ID
 const nanoid = id.nanoid()
 
-// 雪花 ID
-const snowflakeId = id.snowflake()
+// 标准雪花 ID (64位 BigInt 实现)
+const snowflakeId = id.snowflake() // 默认使用 workerId 0
+
+// 创建自定义 workerId 的雪花 ID 生成器
+const generator = createSnowflake(1)
+const sid = generator.nextId()
+
+// 使用 Snowflake 类
+const snowflake = new Snowflake(2)
+const sid2 = snowflake.nextId()
 
 // 增量 ID
 const incrementalId = new id.IncrementalId()
-console.log(incrementalId.next()) // 1
-console.log(incrementalId.next()) // 2
+console.log(incrementalId.next()) // 00001
+console.log(incrementalId.next()) // 00002
 ```
 
 ## 📝 许可证

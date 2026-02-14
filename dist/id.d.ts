@@ -37,8 +37,8 @@ declare function timestampId(): string;
  */
 declare function prefixedTimestampId(prefix: string): string;
 /**
- * 生成雪花 ID（简化版）
- * 注意：这是简化版本，不是完整的分布式雪花算法
+ * 生成雪花 ID
+ * 标准 64 位 ID (使用 BigInt)
  * @example snowflake() // '7139051117411713024'
  */
 declare function snowflake(): string;
@@ -67,6 +67,31 @@ declare function shortId(): string;
  * @example orderedId() // '20231221120000_a3f8k2m9'
  */
 declare function orderedId(): string;
+/**
+ * 雪花 ID 生成器
+ * 标准 64 位 ID (使用 BigInt)
+ * 1位符号位 + 41位时间戳 + 10位机器ID + 12位序列号
+ */
+declare class Snowflake {
+    private static readonly EPOCH;
+    private static readonly WORKER_ID_BITS;
+    private static readonly SEQUENCE_BITS;
+    private static readonly MAX_WORKER_ID;
+    private static readonly MAX_SEQUENCE;
+    private workerId;
+    private sequence;
+    private lastTimestamp;
+    constructor(workerId?: number);
+    /**
+     * 生成下一个 ID
+     */
+    nextId(): string;
+}
+/**
+ * 创建雪花 ID 生成器
+ * @example const gen = createSnowflake(1)
+ */
+declare function createSnowflake(workerId?: number): Snowflake;
 /**
  * 生成数字递增 ID（基于计数器）
  * 注意：这是单实例计数器，不适用于分布式系统
@@ -126,6 +151,8 @@ declare const id: {
     prefixedTimestampId: typeof prefixedTimestampId;
     orderedId: typeof orderedId;
     snowflake: typeof snowflake;
+    createSnowflake: typeof createSnowflake;
+    Snowflake: typeof Snowflake;
     objectId: typeof objectId;
     ulid: typeof ulid;
     createIncrementalId: typeof createIncrementalId;
@@ -135,6 +162,6 @@ declare const id: {
     generateBatch: typeof generateBatch;
     hashId: typeof hashId;
 };
-export { IncrementalId };
+export { IncrementalId, Snowflake };
 export default id;
 //# sourceMappingURL=id.d.ts.map

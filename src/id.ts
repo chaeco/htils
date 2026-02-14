@@ -91,19 +91,12 @@ function prefixedTimestampId(prefix: string): string {
 }
 
 /**
- * 生成雪花 ID（简化版）
- * 注意：这是简化版本，不是完整的分布式雪花算法
+ * 生成雪花 ID
+ * 标准 64 位 ID (使用 BigInt)
  * @example snowflake() // '7139051117411713024'
  */
 function snowflake(): string {
-  const timestamp = Date.now()
-  const machineId = Math.floor(Math.random() * 1024) // 0-1023
-  const sequence = Math.floor(Math.random() * 4096) // 0-4095
-
-  // 简化版雪花算法：时间戳(42位) + 机器ID(10位) + 序列号(12位)
-  const id = (BigInt(timestamp) << 22n) | (BigInt(machineId) << 12n) | BigInt(sequence)
-
-  return id.toString()
+  return defaultSnowflake.nextId()
 }
 
 /**
@@ -179,6 +172,72 @@ function orderedId(): string {
   const random = randomString(8)
 
   return `${year}${month}${day}${hours}${minutes}${seconds}_${random}`
+}
+
+/**
+ * 雪花 ID 生成器
+ * 标准 64 位 ID (使用 BigInt)
+ * 1位符号位 + 41位时间戳 + 10位机器ID + 12位序列号
+ */
+class Snowflake {
+  private static readonly EPOCH = 1609459200000n // 2021-01-01
+  private static readonly WORKER_ID_BITS = 10n
+  private static readonly SEQUENCE_BITS = 12n
+  private static readonly MAX_WORKER_ID = -1n ^ (-1n << Snowflake.WORKER_ID_BITS)
+  private static readonly MAX_SEQUENCE = -1n ^ (-1n << Snowflake.SEQUENCE_BITS)
+
+  private workerId: bigint
+  private sequence = 0n
+  private lastTimestamp = -1n
+
+  constructor(workerId: number = 0) {
+    if (workerId < 0 || BigInt(workerId) > Snowflake.MAX_WORKER_ID) {
+      throw new Error(`Worker ID must be between 0 and ${Snowflake.MAX_WORKER_ID}`)
+    }
+    this.workerId = BigInt(workerId)
+  }
+
+  /**
+   * 生成下一个 ID
+   */
+  nextId(): string {
+    let timestamp = BigInt(Date.now())
+
+    if (timestamp < this.lastTimestamp) {
+      throw new Error('Clock moved backwards!')
+    }
+
+    if (timestamp === this.lastTimestamp) {
+      this.sequence = (this.sequence + 1n) & Snowflake.MAX_SEQUENCE
+      if (this.sequence === 0n) {
+        // 等待下一毫秒
+        while (timestamp <= this.lastTimestamp) {
+          timestamp = BigInt(Date.now())
+        }
+      }
+    } else {
+      this.sequence = 0n
+    }
+
+    this.lastTimestamp = timestamp
+
+    const id =
+      ((timestamp - Snowflake.EPOCH) << (Snowflake.WORKER_ID_BITS + Snowflake.SEQUENCE_BITS)) |
+      (this.workerId << Snowflake.SEQUENCE_BITS) |
+      this.sequence
+
+    return id.toString()
+  }
+}
+
+const defaultSnowflake = new Snowflake(0)
+
+/**
+ * 创建雪花 ID 生成器
+ * @example const gen = createSnowflake(1)
+ */
+function createSnowflake(workerId: number = 0): Snowflake {
+  return new Snowflake(workerId)
 }
 
 /**
@@ -271,29 +330,31 @@ const id = {
   uuid,
   shortUuid,
   guid,
-  
+
   // 短 ID
   nanoid,
   shortId,
-  
+
   // 随机字符串
   randomString,
   randomNumber,
-  
+
   // 时间相关
   timestampId,
   prefixedTimestampId,
   orderedId,
-  
+
   // 特殊 ID
   snowflake,
+  createSnowflake,
+  Snowflake,
   objectId,
   ulid,
-  
+
   // 递增 ID
   createIncrementalId,
   IncrementalId,
-  
+
   // 工具函数
   isUuid,
   isObjectId,
@@ -301,5 +362,5 @@ const id = {
   hashId,
 }
 
-export { IncrementalId }
+export { IncrementalId, Snowflake }
 export default id
