@@ -39,7 +39,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Snowflake = exports.IncrementalId = exports.id = exports.tree = exports.clipboard = exports.device = exports.fileHandler = exports.FPSMonitor = exports.PerformanceMonitor = exports.performance_ = exports.TokenManager = exports.cookie = exports.dom = exports.formRules = exports.FormValidator = exports.form = exports.sensitive = exports.request = exports.crypto = exports.Cache = exports.eventBus = exports.EventBus = exports.logger = exports.Logger = exports.getSessionStorage = exports.getLocalStorage = exports.Storage = exports.debounceThrottle = exports.promise = exports.url = exports.type = exports.date = exports.format = exports.validate = exports.number = exports.file = exports.object = exports.array = exports.string = exports.scformat = void 0;
+exports.createSnowflake = exports.Snowflake = exports.IncrementalId = exports.id = exports.tree = exports.clipboard = exports.device = exports.fileHandler = exports.FPSMonitor = exports.PerformanceMonitor = exports.performance_ = exports.TokenManager = exports.cookie = exports.dom = exports.formRules = exports.FormValidator = exports.form = exports.sensitive = exports.request = exports.crypto = exports.Cache = exports.eventBus = exports.EventBus = exports.logger = exports.Logger = exports.getSessionStorage = exports.getLocalStorage = exports.Storage = exports.debounceThrottle = exports.promise = exports.url = exports.type = exports.date = exports.format = exports.validate = exports.number = exports.file = exports.object = exports.array = exports.string = exports.scformat = void 0;
 const snake_camel_format_1 = __importDefault(require("./snake-camel-format"));
 exports.scformat = snake_camel_format_1.default;
 const string_1 = __importDefault(require("./string"));
@@ -109,6 +109,7 @@ const id_1 = __importStar(require("./id"));
 exports.id = id_1.default;
 Object.defineProperty(exports, "IncrementalId", { enumerable: true, get: function () { return id_1.IncrementalId; } });
 Object.defineProperty(exports, "Snowflake", { enumerable: true, get: function () { return id_1.Snowflake; } });
+Object.defineProperty(exports, "createSnowflake", { enumerable: true, get: function () { return id_1.createSnowflake; } });
 /**
  * 工具函数集合
  */
@@ -152,6 +153,7 @@ const htils = {
     tree: tree_1.default,
     id: id_1.default,
     IncrementalId: id_1.IncrementalId,
+    createSnowflake: id_1.createSnowflake,
 };
 exports.default = htils;
 //# sourceMappingURL=index.js.map

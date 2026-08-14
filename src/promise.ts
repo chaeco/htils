@@ -72,17 +72,18 @@ const promise = {
   /**
    * 并发控制
    * @example await concurrency([promise1, promise2, promise3], 2)
+   * 结果顺序与输入顺序一致（类似 Promise.all），并发度受 limit 限制
    */
   async concurrency<T>(
     promises: Promise<T>[],
     limit: number
   ): Promise<T[]> {
-    const result: T[] = []
-    const executing: Promise<void>[] = []
+    const result: T[] = new Array(promises.length)
+    const executing: Array<Promise<void>> = []
 
-    for (const promise of promises) {
-      const p = Promise.resolve(promise).then(value => {
-        result.push(value)
+    for (let i = 0; i < promises.length; i++) {
+      const p = Promise.resolve(promises[i]!).then(value => {
+        result[i] = value
         executing.splice(executing.indexOf(p), 1)
       })
       executing.push(p)

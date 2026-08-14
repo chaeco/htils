@@ -4,6 +4,7 @@
  */
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Snowflake = exports.IncrementalId = void 0;
+exports.createSnowflake = createSnowflake;
 /**
  * 生成 UUID v4
  * @example uuid() // '550e8400-e29b-41d4-a716-446655440000'

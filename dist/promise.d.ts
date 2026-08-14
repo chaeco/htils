@@ -30,6 +30,7 @@ declare const promise: {
     /**
      * 并发控制
      * @example await concurrency([promise1, promise2, promise3], 2)
+     * 结果顺序与输入顺序一致（类似 Promise.all），并发度受 limit 限制
      */
     concurrency<T>(promises: Promise<T>[], limit: number): Promise<T[]>;
     /**

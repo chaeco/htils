@@ -162,6 +162,6 @@ declare const id: {
     generateBatch: typeof generateBatch;
     hashId: typeof hashId;
 };
-export { IncrementalId, Snowflake };
+export { IncrementalId, Snowflake, createSnowflake };
 export default id;
 //# sourceMappingURL=id.d.ts.map

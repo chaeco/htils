@@ -30,7 +30,7 @@ import fileHandler from './fileHandler'
 import device from './device'
 import clipboard from './clipboard'
 import tree from './tree'
-import id, { IncrementalId, Snowflake } from './id'
+import id, { IncrementalId, Snowflake, createSnowflake } from './id'
 
 /**
  * 工具函数集合
@@ -75,6 +75,7 @@ const htils = {
   tree,
   id,
   IncrementalId,
+  createSnowflake,
 }
 
 export {
@@ -118,6 +119,7 @@ export {
   id,
   IncrementalId,
   Snowflake,
+  createSnowflake,
 }
 
 export default htils

@@ -1,6 +1,6 @@
 # htils - 真实项目工具库
 
-[![NPM Version](https://img.shields.io/badge/version-0.0.4-blue.svg)](https://github.com/chaeco/htils)
+[![NPM Version](https://img.shields.io/badge/version-0.0.5-blue.svg)](https://github.com/chaeco/htils)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue.svg?style=flat&logo=typescript)](https://www.typescriptlang.org/)
 [![Environment](https://img.shields.io/badge/Environment-Isomorphic-brightgreen.svg)](https://github.com/chaeco/htils)
@@ -387,15 +387,18 @@ console.log('LCP:', metrics.lcp) // Largest Contentful Paint
 
 ### 版本说明
 
-精简前函数总数：78 个（4个核心模块）
-精简后函数总数：52 个（精简 33%）
+当前版本共包含 **28 个模块**，覆盖数据处理、异步、浏览器、网络、监控、数据管理等领域。
 
-| 模块   | 原函数数 | 精简后 | 精简比例 |
-| ------ | -------- | ------ | -------- |
-| string | 18       | 11     | 39%      |
-| array  | 25       | 17     | 32%      |
-| number | 20       | 15     | 25%      |
-| promise| 15       | 9      | 40%      |
+核心模块（string / array / number / promise）遵循精简原则，砍掉冗余函数后占比 25%–40%：
+
+| 模块   | 精简前 | 精简后 | 精简比例 |
+| ------ | ------ | ------ | -------- |
+| string | 18     | 11     | 39%      |
+| array  | 25     | 17     | 32%      |
+| number | 20     | 15     | 25%      |
+| promise| 15     | 9      | 40%      |
+
+后续版本在此精简内核之上按需扩展了 DOM、设备检测、文件处理、加密、ID 生成等模块。
 
 ## 🔧 高级用法
 

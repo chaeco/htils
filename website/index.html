@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HTils — 真实项目 TypeScript 工具库</title>
+  <meta name="description" content="HTils：轻量级 TypeScript 工具库。28 个模块覆盖字符串、数组、加密、DOM、设备检测、文件处理、ID 生成等，浏览器与 Node.js 通用。" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230b0f14'/%3E%3Ctext x='16' y='23' font-family='monospace' font-size='18' font-weight='700' fill='%23a78bfa' text-anchor='middle'%3EH%3C/text%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到主要内容</a>
+
+  <div class="backdrop" aria-hidden="true">
+    <div class="backdrop__grid"></div>
+    <div class="backdrop__glow"></div>
+  </div>
+
+  <header class="nav">
+    <div class="nav__inner">
+      <a class="brand" href="#top">
+        <span class="brand__mark" aria-hidden="true">H</span>
+        <span class="brand__name">htils</span>
+      </a>
+      <nav class="nav__links" aria-label="页面导航">
+        <a href="#why">为什么</a>
+        <a href="#modules">模块</a>
+        <a href="#demo">用法</a>
+        <a href="#install">安装</a>
+      </nav>
+      <a class="btn btn--solid nav__cta" href="#install">开始使用</a>
+    </div>
+  </header>
+
+  <main id="main">
+
+    <!-- ── Hero ───────────────────────────────────────────── -->
+    <section class="hero" id="top">
+      <div class="hero__inner">
+        <div class="hero__copy">
+          <p class="eyebrow reveal">TypeScript · Isomorphic · 28 个模块</p>
+          <h1 class="hero__title">
+            <span class="line"><span class="word">真实项目，</span></span>
+            <span class="line"><span class="word accent">真实工具</span></span>
+          </h1>
+          <p class="hero__lead reveal">所有工具都来自真实项目需求——字符串、数组、对象、加密、DOM、设备检测、文件处理、ID 生成。浏览器与 Node.js/SSR 通用。</p>
+          <div class="hero__actions reveal">
+            <a class="btn btn--solid" href="#install">安装 htils</a>
+            <a class="btn btn--ghost" href="#demo">看用法 ↓</a>
+          </div>
+        </div>
+
+        <div class="terminal reveal" aria-label="HTils 演示终端">
+          <div class="terminal__bar">
+            <span class="terminal__dot" aria-hidden="true"></span>
+            <span class="terminal__dot" aria-hidden="true"></span>
+            <span class="terminal__dot" aria-hidden="true"></span>
+            <span class="terminal__title">import { string, crypto } from 'htils'</span>
+          </div>
+          <div class="terminal__body">
+            <pre class="terminal__code" id="terminalCode"><code></code></pre>
+            <div class="terminal__output" id="terminalOutput">
+              <div class="terminal__row"><span class="tok-comment">-- 调用</span></div>
+              <div class="terminal__row tok-sql" id="termSql"></div>
+              <div class="terminal__row"><span class="tok-comment">-- 参数</span></div>
+              <div class="terminal__row tok-param" id="termParams"></div>
+              <div class="terminal__row"><span class="tok-comment">-- 结果</span></div>
+              <div class="terminal__row terminal__result" id="termResult"></div>
+            </div>
+            <div class="terminal__caret" id="terminalCaret" aria-hidden="true">█</div>
+          </div>
+        </div>
+      </div>
+      <div class="hero__scroll-hint" aria-hidden="true">
+        <span>向下滚动</span>
+        <span class="hero__scroll-line"></span>
+      </div>
+    </section>
+
+    <script type="application/json" id="terminalSteps">
+    [
+      {
+        "code": "scformat.snakeToCamel('user_name')          // 'userName'\nscformat.snakeDataToCamel({ user_name: 'tom' })",
+        "sql":    "user_name → userName",
+        "params": "命名转换",
+        "result": "{ userName: 'tom' }"
+      },
+      {
+        "code": "crypto.md5('hello')                        // 5d41402abc4b2a76...\ncrypto.sha256('hello')",
+        "sql":    "MD5 / SHA256 / AES / Base64",
+        "params": "40+ 加密哈希函数",
+        "result": "2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824"
+      },
+      {
+        "code": "const snowflakeId = id.snowflake()         // 64 位 BigInt\nconst generator = createSnowflake(1)\ngenerator.nextId()",
+        "sql":    "UUID / nanoid / snowflake / objectId",
+        "params": "自定义 workerId",
+        "result": "1837... (标准雪花 ID)"
+      }
+    ]
+    </script>
+
+    <!-- ── 事实带 ─────────────────────────────────────────── -->
+    <section class="facts" aria-label="HTils 关键事实">
+      <div class="facts__inner">
+        <div class="fact">
+          <span class="fact__value" data-count="28">28</span>
+          <span class="fact__label">工具模块</span>
+        </div>
+        <div class="fact">
+          <span class="fact__value fact__value--mono">2</span>
+          <span class="fact__label">环境（浏览器 + Node/SSR）</span>
+        </div>
+        <div class="fact">
+          <span class="fact__value">100%</span>
+          <span class="fact__label">TypeScript 类型安全</span>
+        </div>
+        <div class="fact">
+          <span class="fact__value fact__value--mono">0</span>
+          <span class="fact__label">额外依赖（除 crypto-js）</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── 为什么 ─────────────────────────────────────────── -->
+    <section class="why section" id="why">
+      <div class="section__head">
+        <p class="eyebrow">为什么是 HTils</p>
+        <h2 class="section__title">没有为了创建而创建的函数。</h2>
+        <p class="section__sub">精简原则：真实项目常用、没有完美原生替代、确实提升效率——否则就移除。</p>
+      </div>
+      <div class="why__grid">
+        <article class="card reveal">
+          <div class="card__icon" aria-hidden="true">→</div>
+          <h3 class="card__title">实用为先</h3>
+          <p class="card__body">所有工具都来自真实项目需求，不做过度设计。</p>
+          <pre class="card__code"><code><span class="tok-var">import</span> { string, array, object } <span class="tok-var">from</span> <span class="tok-str">'@chaeco/htils'</span>
+
+string.capitalize(<span class="tok-str">'hello'</span>)  <span class="tok-comment">// 'Hello'</span>
+array.chunk([<span class="tok-num">1</span>,<span class="tok-num">2</span>,<span class="tok-num">3</span>,<span class="tok-num">4</span>], <span class="tok-num">2</span>) <span class="tok-comment">// [[1,2],[3,4]]</span></code></pre>
+        </article>
+        <article class="card reveal">
+          <div class="card__icon" aria-hidden="true">?</div>
+          <h3 class="card__title">按需导入</h3>
+          <p class="card__body">按功能分模块，只 import 你要用的部分。</p>
+          <pre class="card__code"><code><span class="tok-comment">// 只引入加密模块</span>
+<span class="tok-var">import</span> { crypto } <span class="tok-var">from</span> <span class="tok-str">'@chaeco/htils'</span>
+crypto.aesEncrypt(<span class="tok-str">'secret'</span>, <span class="tok-str">'password'</span>)</code></pre>
+        </article>
+        <article class="card reveal">
+          <div class="card__icon" aria-hidden="true">!</div>
+          <h3 class="card__title">环境兼容</h3>
+          <p class="card__body">浏览器与 Node.js 自动兼容，递归处理复杂嵌套结构。</p>
+          <pre class="card__code"><code><span class="tok-comment">// 递归转换嵌套数据</span>
+scformat.snakeDataToCamel({
+  user_name: <span class="tok-str">'tom'</span>,
+  profile: { user_age: <span class="tok-num">20</span> },
+})</code></pre>
+        </article>
+      </div>
+    </section>
+
+    <!-- ── 模块一览 ───────────────────────────────────────── -->
+    <section class="honest section" id="modules">
+      <div class="section__head">
+        <p class="eyebrow">模块一览</p>
+        <h2 class="section__title">28 个模块，按领域组织。</h2>
+        <p class="section__sub">数据处理、异步、浏览器、网络、监控、数据管理——覆盖日常开发的方方面面。</p>
+      </div>
+      <div class="table-wrap reveal">
+        <table>
+          <thead>
+            <tr><th>领域</th><th>模块</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>数据处理</td><td><code>string</code> · <code>array</code> · <code>object</code> · <code>number</code> · <code>date</code> · <code>validate</code> · <code>format</code> · <code>scformat</code></td></tr>
+            <tr><td>异步</td><td><code>promise</code> · <code>debounceThrottle</code></td></tr>
+            <tr><td>浏览器</td><td><code>dom</code> · <code>cookie</code> · <code>storage</code> · <code>form</code> · <code>fileHandler</code></td></tr>
+            <tr><td>网络</td><td><code>request</code> · <code>crypto</code>（40+ 函数）</td></tr>
+            <tr><td>监控</td><td><code>performance</code> · <code>logger</code></td></tr>
+            <tr><td>数据管理</td><td><code>cache</code> · <code>eventBus</code> · <code>sensitive</code></td></tr>
+            <tr><td>其他</td><td><code>url</code> · <code>type</code> · <code>file</code></td></tr>
+            <tr><td>设备相关</td><td><code>device</code> · <code>clipboard</code> · <code>tree</code> · <code>id</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ── 用法演示 ───────────────────────────────────────── -->
+    <section class="demo section" id="demo">
+      <div class="section__head">
+        <p class="eyebrow">用法</p>
+        <h2 class="section__title">写起来，就是原生。</h2>
+        <p class="section__sub">命名转换、表单验证、缓存、事件总线、树转换、ID 生成——一行一个。</p>
+      </div>
+
+      <div class="demo__tabs" role="tablist" aria-label="用法示例">
+        <button class="demo__tab is-active" role="tab" aria-selected="true" aria-controls="tab-tree" data-tab="tree">树数据</button>
+        <button class="demo__tab" role="tab" aria-selected="false" aria-controls="tab-cache" data-tab="cache">LRU 缓存</button>
+        <button class="demo__tab" role="tab" aria-selected="false" aria-controls="tab-event" data-tab="event">事件总线</button>
+      </div>
+
+      <div class="demo__panel is-active" id="tab-tree" role="tabpanel" data-panel="tree">
+        <pre class="demo__code"><code><span class="tok-var">import</span> { tree } <span class="tok-var">from</span> <span class="tok-str">'@chaeco/htils'</span>;
+
+<span class="tok-var">const</span> flatList = [
+  { id: <span class="tok-num">1</span>, parentId: <span class="tok-kw">null</span>, name: <span class="tok-str">'root'</span> },
+  { id: <span class="tok-num">2</span>, parentId: <span class="tok-num">1</span>, name: <span class="tok-str">'child1'</span> },
+  { id: <span class="tok-num">3</span>, parentId: <span class="tok-num">1</span>, name: <span class="tok-str">'child2'</span> },
+];
+
+<span class="tok-var">const</span> treeData = tree.listToTree(flatList);
+<span class="tok-var">const</span> node = tree.findNode(treeData, n =&gt; n.id === <span class="tok-num">2</span>);
+<span class="tok-var">const</span> path = tree.findPath(treeData, n =&gt; n.id === <span class="tok-num">3</span>);</code></pre>
+      </div>
+
+      <div class="demo__panel" id="tab-cache" role="tabpanel" data-panel="cache">
+        <pre class="demo__code"><code><span class="tok-var">import</span> { Cache } <span class="tok-var">from</span> <span class="tok-str">'@chaeco/htils'</span>;
+
+<span class="tok-var">const</span> cache = <span class="tok-var">new</span> Cache({
+  ttl: <span class="tok-num">5</span> * <span class="tok-num">60</span> * <span class="tok-num">1000</span>,   <span class="tok-comment">// 5 分钟过期</span>
+  maxSize: <span class="tok-num">100</span>,           <span class="tok-comment">// 最多 100 条</span>
+  onEvict: (key, value) =&gt; {
+    console.log(<span class="tok-str">`缓存被驱逐: ${key}`</span>);
+  },
+});
+
+cache.set(<span class="tok-str">'user:1'</span>, userData, <span class="tok-num">10</span> * <span class="tok-num">60</span> * <span class="tok-num">1000</span>);
+<span class="tok-var">const</span> data = cache.get(<span class="tok-str">'user:1'</span>);</code></pre>
+      </div>
+
+      <div class="demo__panel" id="tab-event" role="tabpanel" data-panel="event">
+        <pre class="demo__code"><code><span class="tok-var">import</span> { eventBus } <span class="tok-var">from</span> <span class="tok-str">'@chaeco/htils'</span>;
+
+<span class="tok-comment">// 订阅</span>
+eventBus.on(<span class="tok-str">'user:login'</span>, (data) =&gt; {
+  console.log(<span class="tok-str">'用户登录:'</span>, data);
+});
+
+<span class="tok-comment">// 发布</span>
+eventBus.emit(<span class="tok-str">'user:login'</span>, { userId: <span class="tok-num">123</span>, name: <span class="tok-str">'John'</span> });
+
+<span class="tok-comment">// 一次性监听</span>
+eventBus.once(<span class="tok-str">'app:init'</span>, () =&gt; {});
+eventBus.off(<span class="tok-str">'user:login'</span>, handler);</code></pre>
+      </div>
+    </section>
+
+    <!-- ── 安装 / CTA ─────────────────────────────────────── -->
+    <section class="cta section" id="install">
+      <div class="cta__box">
+        <p class="eyebrow">开始使用</p>
+        <h2 class="cta__title">把常用的，都收进来。</h2>
+        <pre class="cta__cmd"><code>$ npm install github:chaeco/htils</code><span class="cta__cursor" aria-hidden="true"></span></pre>
+        <p class="cta__note">Isomorphic · 全 TypeScript · MIT</p>
+        <div class="cta__actions">
+          <a class="btn btn--solid" href="https://github.com/chaeco/htils" target="_blank" rel="noopener">GitHub →</a>
+          <a class="btn btn--ghost" href="https://github.com/chaeco/htils#readme" target="_blank" rel="noopener">阅读文档</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="footer__inner">
+      <span class="brand"><span class="brand__mark" aria-hidden="true">H</span> htils</span>
+      <p>真实项目 · 真实需求 · 真实工具</p>
+      <p class="footer__meta">MIT License · @chaeco/htils</p>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

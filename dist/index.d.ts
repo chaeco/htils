@@ -29,7 +29,7 @@ import fileHandler from './fileHandler';
 import device from './device';
 import clipboard from './clipboard';
 import tree from './tree';
-import id, { IncrementalId, Snowflake } from './id';
+import id, { IncrementalId, Snowflake, createSnowflake } from './id';
 /**
  * 工具函数集合
  */
@@ -644,7 +644,7 @@ declare const htils: {
         prefixedTimestampId: (prefix: string) => string;
         orderedId: () => string;
         snowflake: () => string;
-        createSnowflake: (workerId?: number) => Snowflake;
+        createSnowflake: typeof createSnowflake;
         Snowflake: typeof Snowflake;
         objectId: () => string;
         ulid: () => string;
@@ -656,7 +656,8 @@ declare const htils: {
         hashId: (content: string) => string;
     };
     IncrementalId: typeof IncrementalId;
+    createSnowflake: typeof createSnowflake;
 };
-export { scformat, string, array, object, file, number, validate, format, date, type, url, promise, debounceThrottle, Storage, getLocalStorage, getSessionStorage, Logger, logger, EventBus, eventBus, Cache, crypto, request, sensitive, form, FormValidator, formRules, dom, cookie, TokenManager, performance_, PerformanceMonitor, FPSMonitor, fileHandler, device, clipboard, tree, id, IncrementalId, Snowflake, };
+export { scformat, string, array, object, file, number, validate, format, date, type, url, promise, debounceThrottle, Storage, getLocalStorage, getSessionStorage, Logger, logger, EventBus, eventBus, Cache, crypto, request, sensitive, form, FormValidator, formRules, dom, cookie, TokenManager, performance_, PerformanceMonitor, FPSMonitor, fileHandler, device, clipboard, tree, id, IncrementalId, Snowflake, createSnowflake, };
 export default htils;
 //# sourceMappingURL=index.d.ts.map

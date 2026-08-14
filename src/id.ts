@@ -362,5 +362,5 @@ const id = {
   hashId,
 }
 
-export { IncrementalId, Snowflake }
+export { IncrementalId, Snowflake, createSnowflake }
 export default id

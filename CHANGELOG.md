@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.0.5] - 2026-08-14
+
+### Fixed
+
+- **`createSnowflake` export missing** — the factory was only available via the `id` namespace (`id.createSnowflake`); it is now a first-class named export (`import { createSnowflake } from '@chaeco/htils'`), matching the documented usage in the README.
+- **`promise.concurrency()` result ordering** — results are now collected by input index (like `Promise.all`) instead of completion order, so the returned array always matches the input promise order regardless of which promise resolves first.
+- **package-lock version drift** — `package-lock.json` self-version was stale (1.0.0) and is now synced to the package version.
+
+### Added
+
+- **Project website** — `website/` landing page (unified Chaeco dark-terminal style) with live terminal demo, module overview table, and install CTA.
+- **GitHub Pages workflow** — `.github/workflows/pages.yml` deploys `website/` to GitHub Pages.
+
 ## [0.0.4] - 2026-02-14
 
 ### Added
