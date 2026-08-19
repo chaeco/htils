@@ -3,11 +3,9 @@
     "target": "ES2020",
     "module": "ESNext",
     "lib": ["ES2020", "DOM"],
-    "declaration": false,
-    "outDir": "./dist",
-    "declarationDir": null,
-    "declarationMap": false,
-    "sourceMap": false,
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "outDir": "dist-types",
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
@@ -19,5 +17,5 @@
     "types": ["node"]
   },
   "include": ["src"],
-  "exclude": ["node_modules", "dist", "**/*.spec.ts", "**/*.test.ts"]
+  "exclude": ["node_modules", "dist", "dist-types", "**/*.spec.ts", "**/*.test.ts"]
 }

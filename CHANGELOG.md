@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.0.6] - 2026-08-19
+
+### Changed
+
+- **Build system → Rollup** — replaced `tsc` emit with a unified `rollup` bundle (single CJS `dist/index.js` + bundled `dist/index.d.ts`). `moduleResolution` is now `bundler`; imports no longer need extensions.
+
 ## [0.0.5] - 2026-08-14
 
 ### Fixed
